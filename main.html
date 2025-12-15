@@ -9,6 +9,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <!-- Agregar jsPDF para generación de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <style>
         :root {
@@ -47,6 +51,11 @@
             background-color: var(--primary);
             color: white; border: none; padding: 12px;
             border-radius: 10px; font-weight: 600; width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .btn-main:hover {
+            background-color: #e67e22;
         }
 
         .bottom-nav {
@@ -58,7 +67,7 @@
 
         .nav-item-btn {
             background: none; border: none; font-size: 1.4rem; color: #bdc3c7;
-            transition: 0.3s; position: relative;
+            transition: 0.3s; position: relative; cursor: pointer;
         }
         .nav-item-btn.active { color: var(--primary); transform: translateY(-5px); }
         .nav-item-btn.active::after {
@@ -69,6 +78,11 @@
 
         .view-section { display: none; padding: 15px; }
         .view-section.active { display: block; animation: fadeIn 0.4s; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
 
         .ing-tag {
             display: inline-block; background: #ecf0f1; padding: 4px 10px;
@@ -88,6 +102,33 @@
         .unit-selector {
             font-size: 0.75rem;
             padding: 2px 6px;
+        }
+
+        .plato-item {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .plato-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .success-message {
+            color: #27ae60;
+            font-size: 0.8rem;
+            margin-top: 2px;
+        }
+
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 20px;
         }
     </style>
 </head>
@@ -144,6 +185,12 @@
         </div>
 
         <div class="card card-custom p-0">
+            <div class="card-header bg-light">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="fw-bold">Inventario Actual</span>
+                    <span class="badge bg-primary" id="totalItems">0 items</span>
+                </div>
+            </div>
             <ul id="listaInventario" class="list-group list-group-flush small"></ul>
         </div>
     </div>
@@ -178,11 +225,11 @@
                     </select>
                     <button class="btn btn-secondary" onclick="agregarIngredienteTemp()">Agg</button>
                 </div>
-                <div id="listaTempIngredientes" class="d-flex flex-wrap"></div>
+                <div id="listaTempIngredientes" class="d-flex flex-wrap gap-1"></div>
             </div>
             <button class="btn-main" onclick="guardarPlatoCompleto()">Guardar Plato</button>
         </div>
-        <div id="listaMenu" class="row g-2"></div>
+        <div id="listaMenu" class="row g-2 mt-3"></div>
     </div>
 
     <div id="view-ventas" class="view-section">
@@ -194,6 +241,9 @@
                 <button class="btn btn-outline-secondary rounded-circle" onclick="modificarCant(-1)">-</button>
                 <input type="number" id="cantVenta" class="form-control text-center fw-bold fs-4" value="1" style="width: 80px;" min="1" readonly>
                 <button class="btn btn-outline-secondary rounded-circle" onclick="modificarCant(1)">+</button>
+            </div>
+            <div class="mb-3">
+                <small class="text-muted" id="infoStock">Disponible: Verificando...</small>
             </div>
             <button class="btn btn-success w-100 py-3 rounded-3 shadow fw-bold fs-5" onclick="procesarVenta()">COBRAR</button>
         </div>
@@ -222,7 +272,17 @@
                 </div>
             </div>
         </div>
-        <button class="btn btn-primary w-100 mb-3 py-2" onclick="generarReportePDF()">Generar Cierre del Día (PDF)</button>
+        
+        <div class="loading-spinner" id="pdfLoading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="mt-2">Generando reporte...</p>
+        </div>
+        
+        <button class="btn btn-primary w-100 mb-3 py-2" onclick="generarReportePDF()" id="btnGenerarPDF">
+            Generar Cierre del Día (PDF)
+        </button>
         <hr>
         <div class="d-flex gap-2">
             <button class="btn btn-outline-secondary flex-fill" onclick="descargarBackup()">Backup</button>
@@ -245,6 +305,7 @@
         // --- VARIABLES GLOBALES ---
         let data = { inventario: [], menu: [], movimientos: [], tasa: 4200 };
         let recetaTemp = [];
+        let { jsPDF } = window.jspdf;
 
         // --- CONSTANTES DE CONVERSIÓN ---
         const CONVERSIONES = {
@@ -261,14 +322,24 @@
         window.onload = function() {
             if(localStorage.getItem('effata_system_db')) {
                 try {
-                    data = JSON.parse(localStorage.getItem('effata_system_db'));
-                    document.getElementById('tasaCambio').value = data.tasa;
+                    const savedData = JSON.parse(localStorage.getItem('effata_system_db'));
+                    // Validar estructura de datos
+                    if (savedData && typeof savedData === 'object') {
+                        data = {
+                            inventario: savedData.inventario || [],
+                            menu: savedData.menu || [],
+                            movimientos: savedData.movimientos || [],
+                            tasa: savedData.tasa || 4200
+                        };
+                        document.getElementById('tasaCambio').value = data.tasa;
+                    }
                 } catch (e) {
                     console.error('Error al cargar datos:', e);
                     data = { inventario: [], menu: [], movimientos: [], tasa: 4200 };
                 }
             }
             renderizarInterfaz();
+            actualizarSelectVentas();
         };
 
         // --- FUNCIONES DE PERSISTENCIA ---
@@ -284,35 +355,33 @@
             document.querySelectorAll('.nav-item-btn').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + id).classList.add('active');
             btn.classList.add('active');
+            
+            if (id === 'ventas') {
+                actualizarSelectVentas();
+            }
         }
 
         // --- CONVERSIÓN DE UNIDADES ---
         function convertirUnidades(cantidad, unidadOrigen, unidadDestino) {
-            // Si las unidades son iguales, no hay conversión
             if (unidadOrigen === unidadDestino) return cantidad;
             
-            // Si no hay tabla de conversión directa, intentar encontrar camino
             if (CONVERSIONES[unidadOrigen] && CONVERSIONES[unidadOrigen][unidadDestino]) {
                 return cantidad * CONVERSIONES[unidadOrigen][unidadDestino];
             }
             
-            // Para sólidos y líquidos por separado
             const solidas = ['kg', 'g', 'lb', 'oz'];
             const liquidas = ['lt', 'ml'];
             
             if (solidas.includes(unidadOrigen) && solidas.includes(unidadDestino)) {
-                // Convertir a gramos primero, luego a destino
-                const enGramos = convertirUnidades(cantidad, unidadOrigen, 'g');
-                return convertirUnidades(enGramos, 'g', unidadDestino);
+                const enGramos = cantidad * (CONVERSIONES[unidadOrigen]?.['g'] || 1);
+                return enGramos / (CONVERSIONES[unidadDestino]?.['g'] || 1);
             }
             
             if (liquidas.includes(unidadOrigen) && liquidas.includes(unidadDestino)) {
-                // Convertir a ml primero, luego a destino
-                const enMl = convertirUnidades(cantidad, unidadOrigen, 'ml');
-                return convertirUnidades(enMl, 'ml', unidadDestino);
+                const enMl = cantidad * (CONVERSIONES[unidadOrigen]?.['ml'] || 1000);
+                return enMl / (CONVERSIONES[unidadDestino]?.['ml'] || 1000);
             }
             
-            // Si no se puede convertir, devolver la cantidad original
             console.warn(`No se puede convertir de ${unidadOrigen} a ${unidadDestino}`);
             return cantidad;
         }
@@ -325,18 +394,26 @@
             const cantidad = parseFloat(document.getElementById('invCantidad').value);
             const unidad = document.getElementById('invUnidad').value;
 
-            if(!nombre || isNaN(costoTotal) || isNaN(cantidad) || !unidad) {
-                Swal.fire('Error', 'Completa todos los campos correctamente', 'error');
+            if(!nombre || nombre.length < 2) {
+                mostrarError('El nombre debe tener al menos 2 caracteres');
+                return;
+            }
+            
+            if(isNaN(costoTotal) || costoTotal <= 0) {
+                mostrarError('Ingrese un costo válido mayor a 0');
+                return;
+            }
+            
+            if(isNaN(cantidad) || cantidad <= 0) {
+                mostrarError('Ingrese una cantidad válida mayor a 0');
                 return;
             }
 
-            // Verificar si el producto ya existe (por nombre)
             const productoExistente = data.inventario.find(item => 
                 item.nombre.toLowerCase() === nombre.toLowerCase()
             );
 
             if (productoExistente) {
-                // Si existe, preguntar si quiere actualizar o crear uno nuevo
                 Swal.fire({
                     title: 'Producto Existente',
                     text: `"${nombre}" ya existe en el inventario. ¿Qué deseas hacer?`,
@@ -348,10 +425,8 @@
                     denyButtonText: 'Cancelar'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Actualizar producto existente
                         actualizarProductoExistente(productoExistente, costoTotal, moneda, cantidad, unidad);
                     } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        // Crear como nuevo producto (agregar sufijo)
                         crearNuevoProducto(nombre, costoTotal, moneda, cantidad, unidad);
                     }
                 });
@@ -361,20 +436,27 @@
             crearNuevoProducto(nombre, costoTotal, moneda, cantidad, unidad, true);
         }
 
+        function mostrarError(mensaje) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: mensaje,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+
         function actualizarProductoExistente(producto, costoTotal, moneda, cantidad, unidad) {
             const tasa = data.tasa;
             const costoUSD = moneda === 'COP' ? costoTotal / tasa : costoTotal;
             
-            // Convertir la nueva cantidad a la unidad base del producto existente
             const cantidadConvertida = convertirUnidades(cantidad, unidad, producto.unidad);
             
-            // Calcular el nuevo costo unitario promedio
             const costoExistente = producto.costoUnitarioUSD * producto.cantidad;
             const costoNuevo = costoUSD;
             const cantidadTotal = producto.cantidad + cantidadConvertida;
             const costoUnitarioPromedio = (costoExistente + costoNuevo) / cantidadTotal;
             
-            // Actualizar el producto
             producto.costoUnitarioUSD = costoUnitarioPromedio;
             producto.cantidad += cantidadConvertida;
             
@@ -405,12 +487,12 @@
             const costoUnitario = costoUSD / cantidad;
 
             data.inventario.push({
-                id: Date.now(),
+                id: Date.now() + Math.random(),
                 nombre,
                 costoUnitarioUSD: costoUnitario,
                 cantidad,
                 unidad,
-                unidadBase: unidad // Guardar la unidad base para conversiones
+                unidadBase: unidad
             });
 
             data.movimientos.push({
@@ -442,14 +524,14 @@
             }
 
             const opciones = data.inventario.map(i => 
-                `<option value="${i.id}">${i.nombre} (Stock: ${i.cantidad} ${i.unidad})</option>`
+                `<option value="${i.id}">${i.nombre} (Stock: ${i.cantidad.toFixed(2)} ${i.unidad})</option>`
             ).join('');
 
             const { value: formValues } = await Swal.fire({
                 title: 'Registrar Baja',
-                html: `<select id="bajaId" class="swal2-input">${opciones}</select>
-                       <input id="bajaCant" type="number" placeholder="Cantidad" class="swal2-input" step="0.01" min="0.01">
-                       <select id="bajaUnidad" class="swal2-input">
+                html: `<select id="bajaId" class="swal2-input mb-2">${opciones}</select>
+                       <input id="bajaCant" type="number" placeholder="Cantidad" class="swal2-input mb-2" step="0.01" min="0.01">
+                       <select id="bajaUnidad" class="swal2-input mb-2">
                            <option value="kg">kg</option>
                            <option value="g">g</option>
                            <option value="lb">lb</option>
@@ -464,12 +546,17 @@
                 confirmButtonText: 'Registrar',
                 cancelButtonText: 'Cancelar',
                 preConfirm: () => {
-                    return [
-                        document.getElementById('bajaId').value,
-                        document.getElementById('bajaCant').value,
-                        document.getElementById('bajaUnidad').value,
-                        document.getElementById('bajaRazon').value
-                    ];
+                    const id = document.getElementById('bajaId').value;
+                    const cant = document.getElementById('bajaCant').value;
+                    const unidadBaja = document.getElementById('bajaUnidad').value;
+                    const razon = document.getElementById('bajaRazon').value;
+                    
+                    if(!id || !cant || !unidadBaja) {
+                        Swal.showValidationMessage('Complete todos los campos');
+                        return false;
+                    }
+                    
+                    return [id, cant, unidadBaja, razon];
                 }
             });
 
@@ -479,7 +566,6 @@
                 const item = data.inventario.find(i => i.id == id);
                 
                 if(item) {
-                    // Convertir la cantidad a descontar a la unidad base del item
                     const cantidadConvertida = convertirUnidades(cantidad, unidadBaja, item.unidad);
                     
                     if(cantidadConvertida > 0 && item.cantidad >= cantidadConvertida) {
@@ -494,7 +580,6 @@
                             fecha: new Date().toISOString()
                         });
                         
-                        // Si la cantidad llega a 0, eliminar el item
                         if (item.cantidad <= 0) {
                             data.inventario = data.inventario.filter(i => i.id != id);
                         }
@@ -514,7 +599,7 @@
             const id = select.value;
             
             if (!id) {
-                Swal.fire('Error', 'Selecciona un ingrediente primero', 'warning');
+                mostrarError('Selecciona un ingrediente primero');
                 return;
             }
             
@@ -525,23 +610,21 @@
             const unidadSeleccionada = document.getElementById('unidadIngrediente').value;
             
             if (!cantidadInput || cantidadInput <= 0) {
-                Swal.fire('Error', 'Ingresa una cantidad válida', 'warning');
+                mostrarError('Ingresa una cantidad válida');
                 return;
             }
 
-            // Verificar si el ingrediente ya está en la receta temporal
             if (recetaTemp.some(ing => ing.invId === item.id)) {
-                Swal.fire('Error', 'Este ingrediente ya fue agregado a la receta', 'warning');
+                mostrarError('Este ingrediente ya fue agregado a la receta');
                 return;
             }
 
-            // Convertir la cantidad a la unidad base del ingrediente
             const cantidadEnUnidadBase = convertirUnidades(cantidadInput, unidadSeleccionada, item.unidad);
             
             recetaTemp.push({
                 invId: item.id,
                 nombre: item.nombre,
-                cantidad: cantidadEnUnidadBase, // Guardamos en unidad base
+                cantidad: cantidadEnUnidadBase,
                 unidadOriginal: unidadSeleccionada,
                 cantidadOriginal: cantidadInput
             });
@@ -553,12 +636,11 @@
         function actualizarVistaTemp() {
             const container = document.getElementById('listaTempIngredientes');
             container.innerHTML = recetaTemp.map((ing, idx) => {
-                // Mostrar la cantidad en la unidad original seleccionada por el usuario
                 const item = data.inventario.find(i => i.id === ing.invId);
                 const cantidadMostrar = item ? convertirUnidades(ing.cantidad, item.unidad, ing.unidadOriginal) : ing.cantidadOriginal;
                 
                 return `<span class="ing-tag">${ing.nombre}: ${cantidadMostrar.toFixed(2)} ${ing.unidadOriginal} 
-                    <i class="fas fa-times text-danger ms-1" onclick="eliminarIngredienteTemp(${idx})"></i>
+                    <i class="fas fa-times text-danger ms-1" onclick="eliminarIngredienteTemp(${idx})" style="cursor:pointer"></i>
                 </span>`;
             }).join('');
         }
@@ -573,20 +655,25 @@
             const precio = parseFloat(document.getElementById('platoPrecio').value);
             const moneda = document.getElementById('platoMoneda').value;
 
-            if(!nombre || !precio || recetaTemp.length === 0) {
-                Swal.fire('Error', 'Complete todos los datos del plato y agregue ingredientes', 'warning');
+            if(!nombre || nombre.length < 2) {
+                mostrarError('Ingrese un nombre válido para el plato');
+                return;
+            }
+            
+            if(!precio || precio <= 0) {
+                mostrarError('El precio debe ser mayor a 0');
                 return;
             }
 
-            if (precio <= 0) {
-                Swal.fire('Error', 'El precio debe ser mayor a 0', 'error');
+            if (recetaTemp.length === 0) {
+                mostrarError('Agregue al menos un ingrediente al plato');
                 return;
             }
 
             const precioUSD = moneda === 'COP' ? precio / data.tasa : precio;
             
             data.menu.push({
-                id: Date.now(),
+                id: Date.now() + Math.random(),
                 nombre,
                 precioUSD,
                 ingredientes: [...recetaTemp]
@@ -597,7 +684,13 @@
             limpiar(['platoNombre', 'platoPrecio']);
             guardar();
             
-            Swal.fire('¡Éxito!', 'Plato guardado en el menú', 'success');
+            Swal.fire({
+                title: '¡Éxito!',
+                text: 'Plato guardado en el menú',
+                icon: 'success',
+                timer: 1500,
+                showConfirmButton: false
+            });
         }
 
         // --- VENTAS ---
@@ -606,14 +699,31 @@
             let nuevaCantidad = parseInt(input.value) + valor;
             if(nuevaCantidad < 1) nuevaCantidad = 1;
             input.value = nuevaCantidad;
+            verificarStock();
         }
 
-        function procesarVenta() {
+        function actualizarSelectVentas() {
+            const selectVentas = document.getElementById('selVenta');
+            selectVentas.innerHTML = '<option value="">-- Seleccionar --</option>';
+            
+            data.menu.forEach((plato, indice) => {
+                const precioCOP = plato.precioUSD * data.tasa;
+                selectVentas.innerHTML += `
+                    <option value="${indice}">${plato.nombre} - ${formatearMoneda(precioCOP)}</option>
+                `;
+            });
+            
+            selectVentas.addEventListener('change', verificarStock);
+        }
+
+        function verificarStock() {
             const indice = document.getElementById('selVenta').value;
             const cantidad = parseInt(document.getElementById('cantVenta').value);
+            const infoStock = document.getElementById('infoStock');
             
             if(indice === "" || indice === null) {
-                Swal.fire('Error', 'Seleccione un producto del menú', 'warning');
+                infoStock.textContent = 'Seleccione un producto';
+                infoStock.className = 'text-muted';
                 return;
             }
             
@@ -621,7 +731,45 @@
             let hayStock = true;
             let ingredientesFaltantes = [];
 
-            // Verificar stock
+            plato.ingredientes.forEach(ing => {
+                const itemInventario = data.inventario.find(i => i.id == ing.invId);
+                
+                if(!itemInventario) {
+                    hayStock = false;
+                    ingredientesFaltantes.push(`${ing.nombre} (no existe)`);
+                } else {
+                    const cantidadNecesaria = ing.cantidad * cantidad;
+                    if(itemInventario.cantidad < cantidadNecesaria) {
+                        hayStock = false;
+                        const cantidadMostrar = convertirUnidades(cantidadNecesaria, itemInventario.unidad, ing.unidadOriginal || 'g');
+                        const stockMostrar = convertirUnidades(itemInventario.cantidad, itemInventario.unidad, ing.unidadOriginal || 'g');
+                        ingredientesFaltantes.push(`${ing.nombre} (necesita: ${cantidadMostrar.toFixed(2)} ${ing.unidadOriginal || 'g'})`);
+                    }
+                }
+            });
+
+            if(hayStock) {
+                infoStock.textContent = 'Stock disponible ✓';
+                infoStock.className = 'text-success';
+            } else {
+                infoStock.textContent = 'Stock insuficiente';
+                infoStock.className = 'text-danger';
+            }
+        }
+
+        function procesarVenta() {
+            const indice = document.getElementById('selVenta').value;
+            const cantidad = parseInt(document.getElementById('cantVenta').value);
+            
+            if(indice === "" || indice === null) {
+                mostrarError('Seleccione un producto del menú');
+                return;
+            }
+            
+            const plato = data.menu[indice];
+            let hayStock = true;
+            let ingredientesFaltantes = [];
+
             plato.ingredientes.forEach(ing => {
                 const itemInventario = data.inventario.find(i => i.id == ing.invId);
                 
@@ -648,7 +796,6 @@
                 return;
             }
 
-            // Calcular costo y descontar inventario
             let costoTotal = 0;
             plato.ingredientes.forEach(ing => {
                 const itemInventario = data.inventario.find(i => i.id == ing.invId);
@@ -656,7 +803,6 @@
                 itemInventario.cantidad -= cantidadNecesaria;
                 costoTotal += (itemInventario.costoUnitarioUSD * cantidadNecesaria);
                 
-                // Si la cantidad llega a 0, eliminar el item
                 if (itemInventario.cantidad <= 0) {
                     data.inventario = data.inventario.filter(i => i.id != ing.invId);
                 }
@@ -676,6 +822,7 @@
 
             document.getElementById('cantVenta').value = 1;
             guardar();
+            actualizarSelectVentas();
             
             Swal.fire({
                 title: '¡Venta Exitosa!',
@@ -702,7 +849,6 @@
             data.inventario.forEach(item => {
                 valorTotalInventario += (item.costoUnitarioUSD * item.cantidad);
                 
-                // Convertir a gramos para mostrar
                 const cantidadEnGramos = convertirUnidades(item.cantidad, item.unidad, 'g');
                 
                 listaInventario.innerHTML += `
@@ -720,14 +866,12 @@
                 `;
             });
 
+            document.getElementById('totalItems').textContent = `${data.inventario.length} items`;
             document.getElementById('finInversion').innerText = `$${valorTotalInventario.toFixed(2)} USD`;
 
             // Renderizar menú
             const listaMenu = document.getElementById('listaMenu');
-            const selectVentas = document.getElementById('selVenta');
-            
             listaMenu.innerHTML = '';
-            selectVentas.innerHTML = '<option value="">-- Seleccionar --</option>';
 
             data.menu.forEach((plato, indice) => {
                 let costoPlato = 0;
@@ -745,17 +889,13 @@
 
                 listaMenu.innerHTML += `
                     <div class="col-6">
-                        <div class="card card-custom p-3 border-start border-4 border-warning h-100">
+                        <div class="card card-custom p-3 border-start border-4 border-warning h-100 plato-item" onclick="seleccionarPlato(${indice})">
                             <h6 class="fw-bold mb-1">${plato.nombre}</h6>
-                            <div class="text-success fw-bold">${formatearMoneda(precioCOP)} COP</div>
+                            <div class="text-success fw-bold">${formatearMoneda(precioCOP)}</div>
                             <small class="text-muted">Costo: $${costoPlato.toFixed(2)} USD</small><br>
                             <small class="${colorMargen}">Margen: ${margen}%</small>
                         </div>
                     </div>
-                `;
-
-                selectVentas.innerHTML += `
-                    <option value="${indice}">${plato.nombre} - ${formatearMoneda(precioCOP)} COP</option>
                 `;
             });
 
@@ -767,7 +907,6 @@
             let ventasHoy = 0;
             let gananciaHoy = 0;
 
-            // Calcular ventas y ganancias del día
             data.movimientos.forEach(movimiento => {
                 const fechaMovimiento = new Date(movimiento.fecha).toLocaleDateString();
                 if(fechaMovimiento === hoy) {
@@ -781,7 +920,6 @@
                 }
             });
 
-            // Mostrar últimos 10 movimientos
             const movimientosRecientes = data.movimientos.slice().reverse().slice(0, 10);
             
             movimientosRecientes.forEach(movimiento => {
@@ -825,41 +963,181 @@
             document.getElementById('finVentas').innerText = `$${ventasHoy.toFixed(2)} USD`;
         }
 
+        function seleccionarPlato(indice) {
+            document.getElementById('selVenta').value = indice;
+            cambiarVista('ventas', document.querySelector('.nav-item-btn[onclick*="ventas"]'));
+            verificarStock();
+        }
+
         // --- REPORTES PDF ---
-        function generarReportePDF() {
-            const tasa = data.tasa;
-            const hoy = new Date();
-            const hoyStr = hoy.toDateString();
+        async function generarReportePDF() {
+            const btnGenerar = document.getElementById('btnGenerarPDF');
+            const loading = document.getElementById('pdfLoading');
             
-            const movimientosHoy = data.movimientos.filter(m => 
-                new Date(m.fecha).toDateString() === hoyStr
-            );
+            btnGenerar.disabled = true;
+            loading.style.display = 'block';
+            
+            try {
+                const tasa = data.tasa;
+                const hoy = new Date();
+                
+                const movimientosHoy = data.movimientos.filter(m => 
+                    new Date(m.fecha).toDateString() === hoy.toDateString()
+                );
 
-            let totalVentas = 0;
-            let totalBajas = 0;
-            let totalCompras = 0;
-            let gananciaNeta = 0;
+                let totalVentas = 0;
+                let totalBajas = 0;
+                let totalCompras = 0;
+                let gananciaNeta = 0;
 
-            movimientosHoy.forEach(m => {
-                if(m.tipo === 'venta') {
-                    totalVentas += m.monto;
-                    gananciaNeta += m.ganancia;
-                } else if(m.tipo === 'baja') {
-                    totalBajas += m.monto;
-                    gananciaNeta -= m.monto;
-                } else if(m.tipo === 'compra') {
-                    totalCompras += m.monto;
+                movimientosHoy.forEach(m => {
+                    if(m.tipo === 'venta') {
+                        totalVentas += m.monto;
+                        gananciaNeta += (m.ganancia || 0);
+                    } else if(m.tipo === 'baja') {
+                        totalBajas += m.monto;
+                        gananciaNeta -= m.monto;
+                    } else if(m.tipo === 'compra') {
+                        totalCompras += m.monto;
+                        gananciaNeta -= m.monto;
+                    }
+                });
+
+                // Crear documento PDF
+                const doc = new jsPDF();
+                
+                // Logo y título
+                doc.setFontSize(24);
+                doc.setTextColor(211, 84, 0); // Color naranja
+                doc.text('EFFATA', 105, 20, { align: 'center' });
+                doc.setFontSize(12);
+                doc.setTextColor(100, 100, 100);
+                doc.text('Antojos y Sabores', 105, 28, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.setTextColor(0, 0, 0);
+                doc.text(`Cierre Diario - ${hoy.toLocaleDateString('es-ES')}`, 105, 40, { align: 'center' });
+                
+                // Tasa de cambio
+                doc.setFontSize(10);
+                doc.text(`Tasa de cambio: ${tasa.toFixed(2)} COP/USD`, 105, 48, { align: 'center' });
+                
+                let yPos = 60;
+                
+                // Resumen financiero
+                doc.setFontSize(12);
+                doc.setTextColor(44, 62, 80);
+                doc.text('RESUMEN FINANCIERO DEL DÍA', 14, yPos);
+                yPos += 10;
+                
+                doc.autoTable({
+                    startY: yPos,
+                    head: [['Concepto', 'USD', 'COP']],
+                    body: [
+                        ['Ventas Totales', `$${totalVentas.toFixed(2)}`, formatearMoneda(totalVentas * tasa)],
+                        ['Compras/Inversión', `$${totalCompras.toFixed(2)}`, formatearMoneda(totalCompras * tasa)],
+                        ['Bajas/Pérdidas', `$${totalBajas.toFixed(2)}`, formatearMoneda(totalBajas * tasa)],
+                        ['GANANCIA NETA', `$${gananciaNeta.toFixed(2)}`, formatearMoneda(gananciaNeta * tasa)]
+                    ],
+                    headStyles: { fillColor: [211, 84, 0], textColor: [255, 255, 255] },
+                    alternateRowStyles: { fillColor: [245, 245, 245] },
+                    margin: { left: 14, right: 14 }
+                });
+                
+                yPos = doc.lastAutoTable.finalY + 15;
+                
+                // Movimientos del día
+                if (movimientosHoy.length > 0) {
+                    doc.setFontSize(12);
+                    doc.text('MOVIMIENTOS DEL DÍA', 14, yPos);
+                    yPos += 10;
+                    
+                    const movimientosData = movimientosHoy.map(m => {
+                        const hora = new Date(m.fecha).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
+                        const tipo = m.tipo.toUpperCase();
+                        const montoUSD = `$${m.monto.toFixed(2)}`;
+                        const montoCOP = formatearMoneda(m.monto * tasa);
+                        return [hora, tipo, m.detalle, montoUSD, montoCOP];
+                    });
+                    
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Hora', 'Tipo', 'Descripción', 'USD', 'COP']],
+                        body: movimientosData,
+                        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
+                        alternateRowStyles: { fillColor: [245, 245, 245] },
+                        margin: { left: 14, right: 14 },
+                        columnStyles: {
+                            0: { cellWidth: 20 },
+                            1: { cellWidth: 20 },
+                            2: { cellWidth: 70 },
+                            3: { cellWidth: 25 },
+                            4: { cellWidth: 30 }
+                        }
+                    });
+                    
+                    yPos = doc.lastAutoTable.finalY + 15;
                 }
-            });
-            const ventana = window.open('', '_blank');
-            ventana.document.write(html);
-            ventana.document.close();
+                
+                // Inventario actual
+                if (data.inventario.length > 0) {
+                    doc.setFontSize(12);
+                    doc.text('INVENTARIO ACTUAL', 14, yPos);
+                    yPos += 10;
+                    
+                    const inventarioData = data.inventario.map(item => {
+                        const cantidadGramos = convertirUnidades(item.cantidad, item.unidad, 'g');
+                        const valorTotal = item.costoUnitarioUSD * item.cantidad;
+                        return [item.nombre, item.cantidad.toFixed(2), item.unidad, `${cantidadGramos.toFixed(0)}g`, `$${valorTotal.toFixed(2)}`];
+                    });
+                    
+                    const totalInventario = data.inventario.reduce((sum, item) => sum + (item.costoUnitarioUSD * item.cantidad), 0);
+                    inventarioData.push(['TOTAL', '', '', '', `$${totalInventario.toFixed(2)}`]);
+                    
+                    doc.autoTable({
+                        startY: yPos,
+                        head: [['Producto', 'Cantidad', 'Unidad', 'Gramos', 'Valor USD']],
+                        body: inventarioData,
+                        headStyles: { fillColor: [52, 152, 219], textColor: [255, 255, 255] },
+                        alternateRowStyles: { fillColor: [245, 245, 245] },
+                        margin: { left: 14, right: 14 }
+                    });
+                }
+                
+                // Pie de página
+                doc.setFontSize(10);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Generado el ${hoy.toLocaleString('es-ES')}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
+                doc.text('Sistema EFFATA v1.0', 105, doc.internal.pageSize.height - 5, { align: 'center' });
+                
+                // Guardar PDF
+                doc.save(`EFFATA_Cierre_${hoy.toISOString().split('T')[0]}.pdf`);
+                
+                Swal.fire({
+                    title: '¡PDF Generado!',
+                    text: 'El reporte se ha descargado correctamente',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+            } catch (error) {
+                console.error('Error al generar PDF:', error);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo generar el PDF. Intente nuevamente.',
+                    icon: 'error'
+                });
+            } finally {
+                btnGenerar.disabled = false;
+                loading.style.display = 'none';
+            }
         }
 
         // --- BACKUP Y RESTAURACIÓN ---
         function descargarBackup() {
             const fecha = new Date().toISOString().split('T')[0];
-            const hora = new Date().toLocaleTimeString().replace(/:/g, '-');
+            const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }).replace(/:/g, '-');
             const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -890,7 +1168,6 @@
                     reader.onload = function(e) {
                         try {
                             const datos = JSON.parse(e.target.result);
-                            // Validar estructura básica
                             if(datos.inventario && datos.menu && datos.movimientos) {
                                 data = datos;
                                 guardar();
@@ -901,7 +1178,6 @@
                         } catch(err) {
                             Swal.fire('Error', 'No se pudo leer el archivo', 'error');
                         }
-                        // Limpiar input
                         input.value = '';
                     };
                     reader.readAsText(file);
@@ -950,7 +1226,6 @@
             if(this.value < 1) this.value = 1;
         });
 
-        // Animar elementos al cargar
         document.addEventListener('DOMContentLoaded', function() {
             setTimeout(() => {
                 document.querySelector('.app-header').classList.add('animate__animated', 'animate__fadeInDown');
