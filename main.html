@@ -2,1234 +2,2578 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>EFFATA | Sistema de Gestión</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-    
-    <!-- Agregar jsPDF para generación de PDF -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUMINISTROS MEYGO - Sistema de Documentos</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #d35400; 
-            --secondary: #2c3e50; 
-            --bg-light: #f4f6f7;
+            --color-primary: #1e4b82;
+            --color-primary-light: #3a6cb3;
+            --color-secondary: #e8f1ff;
+            --color-accent: #0f2e57;
+            --color-text: #333333;
+            --color-white: #ffffff;
+            --color-border: #a0bce0;
+            --color-light-bg: #f5f9ff;
+            --color-success: #4caf50;
+            --color-warning: #ff9800;
+            --color-danger: #e53935;
+            --color-info: #2196f3;
+            --shadow: 0 5px 15px rgba(30, 75, 130, 0.1);
+            --transition: all 0.3s ease;
+            --border-radius: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background-color: var(--bg-light);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding-bottom: 90px;
+            background: linear-gradient(135deg, #e8f1ff 0%, #c9dbf5 100%);
+            color: var(--color-text);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
         }
 
-        .app-header {
-            background: linear-gradient(135deg, var(--primary), #e67e22);
-            color: white;
-            padding: 20px 15px 30px 15px;
-            border-bottom-left-radius: 25px;
-            border-bottom-right-radius: 25px;
-            box-shadow: 0 4px 15px rgba(211, 84, 0, 0.3);
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: var(--color-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 25px;
             position: relative;
-            z-index: 10;
-        }
-
-        .card-custom {
-            border: none;
-            border-radius: 15px;
-            background: white;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            margin-bottom: 15px;
             overflow: hidden;
         }
 
-        .btn-main {
-            background-color: var(--primary);
-            color: white; border: none; padding: 12px;
-            border-radius: 10px; font-weight: 600; width: 100%;
-            transition: background-color 0.3s;
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--color-border);
+            flex-wrap: wrap;
+            background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+            border-radius: 8px;
+            padding: 20px;
+            color: white;
         }
 
-        .btn-main:hover {
-            background-color: #e67e22;
+        .logo-container {
+            display: flex;
+            align-items: center;
         }
 
-        .bottom-nav {
-            position: fixed; bottom: 20px; left: 5%; width: 90%;
-            background: white; height: 65px; border-radius: 35px;
-            display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15); z-index: 1000;
+        .logo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            margin-right: 15px;
+            overflow: hidden;
+            background: white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
 
-        .nav-item-btn {
-            background: none; border: none; font-size: 1.4rem; color: #bdc3c7;
-            transition: 0.3s; position: relative; cursor: pointer;
-        }
-        .nav-item-btn.active { color: var(--primary); transform: translateY(-5px); }
-        .nav-item-btn.active::after {
-            content: ''; position: absolute; bottom: -8px; left: 50%;
-            transform: translateX(-50%); width: 5px; height: 5px;
-            background: var(--primary); border-radius: 50%;
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .view-section { display: none; padding: 15px; }
-        .view-section.active { display: block; animation: fadeIn 0.4s; }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        .logo-placeholder {
+            font-weight: bold;
+            text-align: center;
+            font-size: 14px;
+            color: var(--color-primary);
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
         }
 
-        .ing-tag {
-            display: inline-block; background: #ecf0f1; padding: 4px 10px;
-            border-radius: 15px; font-size: 0.85rem; margin: 2px;
-        }
-        
-        .tasa-wrapper {
-            background: rgba(255,255,255,0.2); backdrop-filter: blur(5px);
-            padding: 5px 15px; border-radius: 20px; display: inline-flex;
-            align-items: center; margin-top: 10px;
-        }
-        .tasa-input {
-            background: transparent; border: none; color: white;
-            font-weight: bold; width: 60px; text-align: center; outline: none;
-        }
-        
-        .unit-selector {
-            font-size: 0.75rem;
-            padding: 2px 6px;
+        .company-info-header {
+            display: flex;
+            flex-direction: column;
         }
 
-        .plato-item {
+        .company-name {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .company-details-header {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+
+        .document-info {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 200px;
+        }
+
+        .document-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .document-number {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .edit-control-btn {
+            background: transparent;
+            border: none;
+            color: white;
             cursor: pointer;
-            transition: transform 0.2s;
+            font-size: 16px;
+            transition: var(--transition);
         }
 
-        .plato-item:hover {
+        .edit-control-btn:hover {
+            color: #ffeb3b;
+        }
+
+        .payment-methods {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .payment-method {
+            padding: 12px 20px;
+            background-color: var(--color-light-bg);
+            border-radius: 6px;
+            border: 2px solid var(--color-border);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: bold;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            max-width: 200px;
+        }
+
+        .payment-method.active {
+            border-color: var(--color-primary);
+            background-color: var(--color-secondary);
+            box-shadow: 0 0 0 3px rgba(30, 75, 130, 0.2);
             transform: translateY(-2px);
         }
 
-        .error-message {
-            color: #e74c3c;
-            font-size: 0.8rem;
-            margin-top: 2px;
+        .payment-method i {
+            font-size: 18px;
         }
 
-        .success-message {
-            color: #27ae60;
-            font-size: 0.8rem;
-            margin-top: 2px;
+        .document-type-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
-        .loading-spinner {
-            display: none;
-            text-align: center;
+        .doc-type-btn {
+            padding: 12px 20px;
+            border: 2px solid var(--color-primary);
+            border-radius: 6px;
+            background-color: var(--color-white);
+            color: var(--color-primary);
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+            max-width: 200px;
+        }
+
+        .doc-type-btn.active {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 75, 130, 0.3);
+        }
+
+        .doc-type-btn i {
+            font-size: 18px;
+        }
+
+        .info-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background-color: var(--color-white);
+            border-radius: 8px;
             padding: 20px;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--color-primary);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(30, 75, 130, 0.15);
+        }
+
+        h2 {
+            color: var(--color-primary);
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 i {
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--color-accent);
+            font-size: 14px;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            font-size: 14px;
+            transition: var(--transition);
+            background-color: var(--color-white);
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(30, 75, 130, 0.2);
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        .client-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .client-selector select {
+            flex: 1;
+        }
+
+        .client-selector button {
+            padding: 12px 15px;
+            background-color: var(--color-info);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .client-selector button:hover {
+            background-color: #0b7dda;
+        }
+
+        .products-section {
+            background-color: var(--color-white);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: var(--shadow);
+            border-top: 4px solid var(--color-success);
+            margin-bottom: 25px;
+        }
+
+        .product-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--color-light-bg);
+            border-radius: 8px;
+        }
+
+        .products-table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin: 20px 0;
+        }
+
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--color-white);
+            font-size: 14px;
+            min-width: 800px;
+        }
+
+        .products-table th {
+            background-color: var(--color-primary);
+            color: var(--color-white);
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .products-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .products-table tr:nth-child(even) {
+            background-color: var(--color-secondary);
+        }
+
+        .products-table tr:hover {
+            background-color: rgba(30, 75, 130, 0.05);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--color-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(30, 75, 130, 0.3);
+        }
+
+        .btn-danger {
+            background-color: var(--color-danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c62828;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background-color: var(--color-success);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #388e3c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-warning {
+            background-color: var(--color-warning);
+            color: white;
+        }
+
+        .btn-warning:hover {
+            background-color: #f57c00;
+            transform: translateY(-2px);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .summary {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--color-secondary);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-primary);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--color-border);
+            font-size: 15px;
+        }
+
+        .total {
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--color-primary);
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid var(--color-primary);
+        }
+
+        .payment-info {
+            margin-top: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-success);
+        }
+
+        .payment-info h3 {
+            color: var(--color-success);
+            margin-bottom: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-details {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .payment-details div {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+        .dollar-rate-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .currency-display {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .dual-currency {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        .currency-box {
+            flex: 1;
+            padding: 15px;
+            background-color: var(--color-light-bg);
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid var(--color-border);
+        }
+
+        .currency-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--color-accent);
+        }
+
+        .currency-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-title {
+            font-size: 20px;
+            color: var(--color-primary);
+            font-weight: bold;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--color-text);
+        }
+
+        .client-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid var(--color-border);
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+
+        .client-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid var(--color-border);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .client-item:hover {
+            background-color: var(--color-secondary);
+        }
+
+        .client-item:last-child {
+            border-bottom: none;
+        }
+
+        .supplier-section {
+            margin-top: 25px;
+            padding: 20px;
+            background-color: var(--color-light-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--color-warning);
+        }
+
+        .supplier-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .status-bar {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--color-success);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .data-management {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: var(--color-light-bg);
+            border-radius: 8px;
+            border: 1px solid var(--color-border);
+        }
+
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .rate-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .logo {
+                margin-right: 0;
+                margin-bottom: 12px;
+            }
+
+            .info-section {
+                grid-template-columns: 1fr;
+            }
+
+            .payment-methods,
+            .document-type-selector {
+                flex-wrap: wrap;
+            }
+
+            .payment-method,
+            .doc-type-btn {
+                min-width: 100%;
+            }
+
+            .product-form {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .dual-currency {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 15px;
+            }
+
+            .header-container {
+                padding: 15px;
+            }
+
+            .company-name {
+                font-size: 20px;
+            }
+
+            .document-title {
+                font-size: 18px;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+            }
         }
     </style>
 </head>
+
 <body>
-
-    <header class="app-header text-center">
-        <h2 class="fw-bold m-0"><i class="fas fa-utensils me-2"></i>EFFATA</h2>
-        <small style="opacity: 0.9;">Antojos y Sabores</small>
-        <br>
-        <div class="tasa-wrapper">
-            <small class="me-2">Tasa Hoy:</small>
-            <input type="number" id="tasaCambio" class="tasa-input" value="4200" step="0.01" min="1">
-            <small>COP</small>
+    <div class="container">
+        <div class="header-container">
+            <div class="logo-container">
+                <div class="logo">
+                    <img src="logomeygo.png" alt="Logo SUMINISTROS MEYGO"
+                        onerror="this.style.display='none'; document.querySelector('.logo').innerHTML='<div class=\'logo-placeholder\'>SUMINISTROS MEYGO</div>';">
+                </div>
+                <div class="company-info-header">
+                    <div class="company-name">SUMINISTROS MEYGO, C.A.</div>
+                    <div class="company-details-header">RIF: J-410220430</div>
+                </div>
+            </div>
+            <div class="document-info">
+                <div class="document-title" id="documentTitle">PRESUPUESTO</div>
+                <div class="document-number">
+                    <span id="controlNumberDisplay">0001/25</span>
+                    <button class="edit-control-btn" id="editControlBtn">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+            </div>
         </div>
-    </header>
 
-    <div id="view-inventario" class="view-section active">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="text-secondary fw-bold m-0">Bodega e Insumos</h5>
-            <button class="btn btn-sm btn-outline-danger" onclick="modalBaja()">
-                <i class="fas fa-trash-alt"></i> Reportar Baja
+        <div class="payment-methods">
+            <div class="payment-method active" data-payment="dolares">
+                <i class="fas fa-dollar-sign"></i>
+                Pago en Dólares
+            </div>
+            <div class="payment-method" data-payment="bolivares">
+                <i class="fas fa-bolt"></i>
+                Pago en Bolívares
+            </div>
+            <div class="payment-method" data-payment="mixto">
+                <i class="fas fa-exchange-alt"></i>
+                Pago Mixto
+            </div>
+        </div>
+
+        <div class="document-type-selector">
+            <button class="doc-type-btn active" data-doctype="presupuesto">
+                <i class="fas fa-file-invoice-dollar"></i>
+                Presupuesto
+            </button>
+            <button class="doc-type-btn" data-doctype="factura">
+                <i class="fas fa-receipt"></i>
+                Factura
+            </button>
+            <button class="doc-type-btn" data-doctype="nota">
+                <i class="fas fa-truck"></i>
+                Nota de Entrega
             </button>
         </div>
 
-        <div class="card card-custom p-3">
-            <label class="small text-muted fw-bold mb-2">NUEVA COMPRA</label>
-            <input type="text" id="invNombre" class="form-control mb-2" placeholder="Nombre (ej. Carne, Pan)">
-            <div class="row g-2">
-                <div class="col-6">
-                    <input type="number" id="invCosto" class="form-control" placeholder="Costo" step="0.01" min="0">
+        <div class="info-section">
+            <div class="card">
+                <h2><i class="fas fa-user"></i> Información del Cliente</h2>
+                <div class="form-group">
+                    <label for="clientName">Nombre de Cliente</label>
+                    <div class="client-selector">
+                        <select id="clientSelect">
+                            <option value="">Seleccione un cliente</option>
+                        </select>
+                        <button id="clearClientBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="col-6">
-                    <select id="invMoneda" class="form-select bg-light fw-bold">
-                        <option value="COP">PESOS</option>
-                        <option value="USD">USD</option>
-                    </select>
+                <div class="form-group">
+                    <label for="clientName">Nombre de Cliente</label>
+                    <input type="text" id="clientName" placeholder="Ej: UPEL">
                 </div>
-                <div class="col-6">
-                    <input type="number" id="invCantidad" class="form-control" placeholder="Cantidad" step="0.01" min="0.01">
+                <div class="form-group">
+                    <label for="clientAddress">Dirección del Cliente</label>
+                    <textarea id="clientAddress" rows="2" placeholder="Dirección completa del cliente"></textarea>
                 </div>
-                <div class="col-6">
-                    <select id="invUnidad" class="form-select">
-                        <option value="kg">Kilogramos (kg)</option>
-                        <option value="g">Gramos (g)</option>
-                        <option value="lb">Libras (lb)</option>
-                        <option value="und">Unidades (und)</option>
-                        <option value="lt">Litros (lt)</option>
-                        <option value="ml">Mililitros (ml)</option>
-                        <option value="oz">Onzas (oz)</option>
-                    </select>
+                <div class="form-group">
+                    <label for="clientRIF">RIF/Cédula</label>
+                    <input type="text" id="clientRIF" placeholder="Ej: J-123456789">
                 </div>
-            </div>
-            <button class="btn-main mt-3" onclick="agregarIngrediente()">Guardar</button>
-        </div>
-
-        <div class="card card-custom p-0">
-            <div class="card-header bg-light">
-                <div class="d-flex justify-content-between align-items-center">
-                    <span class="fw-bold">Inventario Actual</span>
-                    <span class="badge bg-primary" id="totalItems">0 items</span>
+                <div class="form-group">
+                    <button id="saveClientBtn" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Guardar Cliente
+                    </button>
                 </div>
             </div>
-            <ul id="listaInventario" class="list-group list-group-flush small"></ul>
-        </div>
-    </div>
 
-    <div id="view-menu" class="view-section">
-        <h5 class="text-secondary fw-bold mb-3">Gestión de Menú</h5>
-        <div class="card card-custom p-3">
-            <label class="small text-muted fw-bold">DATOS DEL PLATO</label>
-            <input type="text" id="platoNombre" class="form-control mb-2" placeholder="Nombre del Plato">
-            <div class="input-group mb-3">
-                <span class="input-group-text bg-success text-white border-0">Precio Venta</span>
-                <input type="number" id="platoPrecio" class="form-control" placeholder="0.00" step="0.01" min="0">
-                <select id="platoMoneda" class="form-select" style="max-width: 90px;">
-                    <option value="COP">COP</option>
-                    <option value="USD">USD</option>
+            <div class="card">
+                <h2><i class="fas fa-cog"></i> Configuración</h2>
+                <div class="dollar-rate-container" id="dollarRateContainer">
+                    <div class="form-group" style="flex: 1;">
+                        <label for="dollarRate">Tasa del Dólar (BCV)</label>
+                        <input type="number" id="dollarRate" step="0.01" min="0" value="36.50" placeholder="Ej: 36.50">
+                        <div class="rate-info">Usada solo para conversión en pago mixto</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="ivaPercentage">Porcentaje de IVA</label>
+                    <input type="number" id="ivaPercentage" step="0.01" min="0" value="16" placeholder="Ej: 16%">
+                </div>
+
+                <div style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed var(--color-border);">
+                    <h3><i class="fas fa-history"></i> Historial Reciente</h3>
+                    <div id="historyList"
+                        style="max-height: 200px; overflow-y: auto; margin-top: 10px; font-size: 13px;">
+                        <div style="text-align: center; color: #888;">No hay documentos recientes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección: Gestión de Productos/Proveedores -->
+        <div class="supplier-section">
+            <h2><i class="fas fa-industry"></i> Gestión de Productos/Proveedores</h2>
+            <div class="supplier-form">
+                <div class="form-group">
+                    <label for="supplierName">Nombre del Proveedor</label>
+                    <input type="text" id="supplierName" placeholder="Ej: Distribuidora XYZ">
+                </div>
+                <div class="form-group">
+                    <label for="productCatalog">Producto/Servicio</label>
+                    <input type="text" id="productCatalog" placeholder="Ej: Material de oficina">
+                </div>
+                <div class="form-group">
+                    <label for="productCost">Costo Unitario ($)</label>
+                    <input type="number" id="productCost" step="0.01" min="0" placeholder="Ej: 50.00">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button id="addSupplierProduct" class="btn btn-warning">
+                        <i class="fas fa-plus"></i> Agregar al Catálogo
+                    </button>
+                </div>
+            </div>
+            <div class="form-group">
+                <select id="catalogSelect" style="width: 100%;">
+                    <option value="">Seleccione del catálogo para agregar rápido</option>
                 </select>
             </div>
-            <hr class="my-2">
-            <label class="small text-primary fw-bold">INGREDIENTES (RECETA)</label>
-            <div class="bg-light p-2 rounded border mb-2">
-                <div class="input-group input-group-sm mb-2">
-                    <select id="selIngrediente" class="form-select"></select>
-                    <input type="number" id="cantIngrediente" class="form-control" placeholder="Cant." style="max-width: 70px;" step="0.01" min="0.01">
-                    <select id="unidadIngrediente" class="form-select unit-selector" style="max-width: 80px;">
-                        <option value="kg">kg</option>
-                        <option value="g" selected>g</option>
-                        <option value="lb">lb</option>
-                        <option value="oz">oz</option>
-                        <option value="und">und</option>
-                        <option value="lt">lt</option>
-                        <option value="ml">ml</option>
-                    </select>
-                    <button class="btn btn-secondary" onclick="agregarIngredienteTemp()">Agg</button>
+        </div>
+
+        <div class="products-section">
+            <h2><i class="fas fa-boxes"></i> Productos / Servicios</h2>
+            <div class="product-form">
+                <div class="form-group">
+                    <label for="productName">Descripción</label>
+                    <input type="text" id="productName" placeholder="Ej: Materiales de oficina">
                 </div>
-                <div id="listaTempIngredientes" class="d-flex flex-wrap gap-1"></div>
-            </div>
-            <button class="btn-main" onclick="guardarPlatoCompleto()">Guardar Plato</button>
-        </div>
-        <div id="listaMenu" class="row g-2 mt-3"></div>
-    </div>
-
-    <div id="view-ventas" class="view-section">
-        <h5 class="text-secondary fw-bold mb-3">Punto de Venta</h5>
-        <div class="card card-custom p-4 text-center border-2 border-success">
-            <label class="text-muted small mb-2">SELECCIONAR PRODUCTO</label>
-            <select id="selVenta" class="form-select form-select-lg mb-3 fw-bold text-dark text-center"></select>
-            <div class="d-flex justify-content-center align-items-center gap-3 mb-4">
-                <button class="btn btn-outline-secondary rounded-circle" onclick="modificarCant(-1)">-</button>
-                <input type="number" id="cantVenta" class="form-control text-center fw-bold fs-4" value="1" style="width: 80px;" min="1" readonly>
-                <button class="btn btn-outline-secondary rounded-circle" onclick="modificarCant(1)">+</button>
-            </div>
-            <div class="mb-3">
-                <small class="text-muted" id="infoStock">Disponible: Verificando...</small>
-            </div>
-            <button class="btn btn-success w-100 py-3 rounded-3 shadow fw-bold fs-5" onclick="procesarVenta()">COBRAR</button>
-        </div>
-        <h6 class="mt-4 text-muted ms-2">Ventas Recientes</h6>
-        <div id="historialVentas" class="list-group shadow-sm rounded-3"></div>
-    </div>
-
-    <div id="view-finanzas" class="view-section">
-        <h5 class="text-secondary fw-bold mb-3">Reportes y Cierre</h5>
-        <div class="card card-custom bg-dark text-white p-4 text-center mb-3">
-            <small class="text-uppercase opacity-75">Ganancia Real (Hoy)</small>
-            <h1 id="finGanancia" class="text-success fw-bold m-0">$0.00</h1>
-            <small id="finGananciaCop" class="d-block mt-1">0 COP</small>
-        </div>
-        <div class="row g-2 mb-4">
-            <div class="col-6">
-                <div class="card card-custom p-3 text-center h-100">
-                    <small class="text-danger fw-bold">Inversión Stock</small>
-                    <div id="finInversion" class="fw-bold mt-1">$0</div>
+                <div class="form-group">
+                    <label for="productQuantity">Cantidad</label>
+                    <input type="number" id="productQuantity" min="1" value="1" placeholder="Ej: 2">
+                </div>
+                <div class="form-group">
+                    <label for="productUnit">Unidad de Medida</label>
+                    <input type="text" id="productUnit" placeholder="Ej: Unidad, Horas, Metros">
+                </div>
+                <div class="form-group">
+                    <label for="productPrice" id="productPriceLabel">Precio Unitario ($)</label>
+                    <input type="number" id="productPrice" step="0.01" min="0" placeholder="Ej: 100.00">
+                    <div class="rate-info" id="priceRateInfo"></div>
+                </div>
+                <div class="checkbox-group">
+                    <input type="checkbox" id="productIVA">
+                    <label for="productIVA">Aplicar IVA</label>
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button id="addProduct" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
                 </div>
             </div>
-            <div class="col-6">
-                <div class="card card-custom p-3 text-center h-100">
-                    <small class="text-primary fw-bold">Total Ventas</small>
-                    <div id="finVentas" class="fw-bold mt-1">$0</div>
+
+            <div class="products-table-container">
+                <table class="products-table" id="productsTable">
+                    <thead id="productsTableHead">
+                        <tr>
+                            <th>Descripción</th>
+                            <th>Cantidad</th>
+                            <th>Unidad</th>
+                            <th class="price-header" id="priceUnitHeader">Precio Unitario ($)</th>
+                            <th class="price-header" id="priceTotalHeader">Precio Total ($)</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productsList">
+                        <!-- Los productos se agregarán aquí dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="summary">
+                <div class="summary-item">
+                    <span>Subtotal:</span>
+                    <span id="subtotalDisplay">$0.00</span>
+                </div>
+                <div class="summary-item">
+                    <span>IVA (<span id="ivaPercent">16</span>%):</span>
+                    <span id="ivaAmount">$0.00</span>
+                </div>
+                <div class="total">
+                    <span>TOTAL GENERAL:</span>
+                    <span id="totalAmount">$0.00</span>
+                </div>
+                <div class="currency-display" id="currencyDisplay">
+                    <!-- Aquí se mostrarán las conversiones de moneda según el método de pago -->
                 </div>
             </div>
         </div>
-        
-        <div class="loading-spinner" id="pdfLoading">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Cargando...</span>
+
+        <div class="payment-info">
+            <h3>
+                <i class="fas fa-credit-card"></i> Información de Pago
+                <button id="editPaymentInfoBtn" class="edit-control-btn"
+                    style="color: var(--color-success); margin-left: auto;">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </h3>
+            <div class="payment-details" id="paymentDetailsContainer">
+                <!-- Se llenará dinámicamente -->
             </div>
-            <p class="mt-2">Generando reporte...</p>
         </div>
-        
-        <button class="btn btn-primary w-100 mb-3 py-2" onclick="generarReportePDF()" id="btnGenerarPDF">
-            Generar Cierre del Día (PDF)
-        </button>
-        <hr>
-        <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary flex-fill" onclick="descargarBackup()">Backup</button>
-            <button class="btn btn-outline-secondary flex-fill" onclick="document.getElementById('fileInput').click()">Restaurar</button>
-            <input type="file" id="fileInput" style="display:none" accept=".json" onchange="restaurarBackup(this)">
+
+        <!-- Gestión de Datos -->
+        <div class="data-management">
+            <h3><i class="fas fa-database"></i> Gestión de Datos Locales</h3>
+            <p style="font-size: 13px; margin-bottom: 15px; color: #666;">
+                Los datos se almacenan automáticamente en su navegador. Puede respaldarlos o restaurarlos cuando lo necesite.
+            </p>
+            <div class="data-actions">
+                <button id="backupData" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Respaldar Datos
+                </button>
+                <button id="restoreData" class="btn btn-warning">
+                    <i class="fas fa-upload"></i> Restaurar Datos
+                </button>
+                <button id="clearAllData" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Limpiar Todo
+                </button>
+            </div>
         </div>
-        <div class="text-center mt-4">
-            <button class="btn btn-link text-danger text-decoration-none btn-sm" onclick="borrarTodo()">Resetear Fábrica</button>
+
+        <div class="actions">
+            <button id="generatePDF" class="btn btn-success">
+                <i class="fas fa-file-pdf"></i> Generar PDF
+            </button>
+            <button id="clearAll" class="btn btn-danger">
+                <i class="fas fa-trash-alt"></i> Limpiar Documento
+            </button>
         </div>
     </div>
 
-    <nav class="bottom-nav">
-        <button class="nav-item-btn active" onclick="cambiarVista('inventario', this)"><i class="fas fa-boxes"></i></button>
-        <button class="nav-item-btn" onclick="cambiarVista('menu', this)"><i class="fas fa-book-open"></i></button>
-        <button class="nav-item-btn" onclick="cambiarVista('ventas', this)"><i class="fas fa-cash-register"></i></button>
-        <button class="nav-item-btn" onclick="cambiarVista('finanzas', this)"><i class="fas fa-chart-pie"></i></button>
-    </nav>
+    <!-- Modal para editar número de control -->
+    <div class="modal" id="controlNumberModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Editar Número de Control</div>
+                <button class="close-modal" id="closeModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="controlNumberInput">Número de Control</label>
+                <input type="text" id="controlNumberInput" placeholder="Ej: 0001/25">
+            </div>
+            <div class="actions">
+                <button id="saveControlNumber" class="btn btn-success">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+                <button id="cancelControlNumber" class="btn btn-danger">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para editar Información de Pago -->
+    <div class="modal" id="paymentInfoModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Editar Información de Pago</div>
+                <button class="close-modal" id="closePaymentModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <div id="paymentLinesList">
+                    <!-- Inputs dinámicos -->
+                </div>
+                <button id="addPaymentLineBtn" class="btn btn-primary" style="margin-top: 10px; width: 100%;">
+                    <i class="fas fa-plus"></i> Agregar Línea
+                </button>
+            </div>
+            <div class="actions">
+                <button id="savePaymentInfoModal" class="btn btn-success">
+                    <i class="fas fa-save"></i> Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para gestionar clientes -->
+    <div class="modal" id="clientsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">Gestión de Clientes</div>
+                <button class="close-modal" id="closeClientsModal">&times;</button>
+            </div>
+            <div class="form-group">
+                <input type="text" id="clientSearch" placeholder="Buscar cliente...">
+            </div>
+            <div class="client-list" id="clientList">
+                <!-- Lista de clientes se cargará aquí -->
+            </div>
+            <div class="actions">
+                <button id="closeClients" class="btn btn-primary">
+                    <i class="fas fa-times"></i> Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Barra de estado para mostrar notificaciones -->
+    <div class="status-bar" id="statusBar">
+        <i class="fas fa-check-circle"></i>
+        <span id="statusText">Datos guardados</span>
+    </div>
 
     <script>
-        // --- VARIABLES GLOBALES ---
-        let data = { inventario: [], menu: [], movimientos: [], tasa: 4200 };
-        let recetaTemp = [];
-        let { jsPDF } = window.jspdf;
+        // Variables globales
+        let products = [];
+        let subtotalUSD = 0;
+        let subtotalBS = 0;
+        let ivaAmount = 0;
+        let totalUSD = 0;
+        let totalBS = 0;
+        let currentPaymentMethod = 'dolares';
+        let currentDocType = 'presupuesto';
 
-        // --- CONSTANTES DE CONVERSIÓN ---
-        const CONVERSIONES = {
-            'kg': { 'g': 1000, 'kg': 1, 'lb': 2.20462, 'oz': 35.274 },
-            'g': { 'kg': 0.001, 'g': 1, 'lb': 0.00220462, 'oz': 0.035274 },
-            'lb': { 'kg': 0.453592, 'g': 453.592, 'lb': 1, 'oz': 16 },
-            'oz': { 'kg': 0.0283495, 'g': 28.3495, 'lb': 0.0625, 'oz': 1 },
-            'lt': { 'ml': 1000, 'lt': 1 },
-            'ml': { 'lt': 0.001, 'ml': 1 },
-            'und': { 'und': 1 }
+        // Datos Persistentes (LocalStorage)
+        let persistentData = {
+            controlNumbers: {
+                presupuesto: 0,
+                factura: 0,
+                nota: 0
+            },
+            dollarRate: 36.50,
+            paymentInfo: [
+                "CUENTA CORRIENTE BANCAMIGA Nº 01720110791109143634",
+                "A NOMBRE DE SUMINISTROS MEYGO RIF J-410220430",
+                "TASA BCV DEL DIA"
+            ],
+            clients: [],
+            documents: [],
+            suppliers: [],
+            catalog: []
         };
 
-        // --- INICIALIZACIÓN ---
-        window.onload = function() {
-            if(localStorage.getItem('effata_system_db')) {
-                try {
-                    const savedData = JSON.parse(localStorage.getItem('effata_system_db'));
-                    // Validar estructura de datos
-                    if (savedData && typeof savedData === 'object') {
-                        data = {
-                            inventario: savedData.inventario || [],
-                            menu: savedData.menu || [],
-                            movimientos: savedData.movimientos || [],
-                            tasa: savedData.tasa || 4200
-                        };
-                        document.getElementById('tasaCambio').value = data.tasa;
-                    }
-                } catch (e) {
-                    console.error('Error al cargar datos:', e);
-                    data = { inventario: [], menu: [], movimientos: [], tasa: 4200 };
+        // Referencia a controlNumbers para compatibilidad
+        let controlNumbers = persistentData.controlNumbers;
+
+        // Función para mostrar notificaciones
+        function showStatus(message, type = 'success') {
+            const statusBar = document.getElementById('statusBar');
+            const statusText = document.getElementById('statusText');
+            
+            statusBar.style.backgroundColor = type === 'success' ? 'var(--color-success)' : 
+                                            type === 'error' ? 'var(--color-danger)' : 
+                                            'var(--color-warning)';
+            statusText.textContent = message;
+            statusBar.style.display = 'flex';
+            
+            setTimeout(() => {
+                statusBar.style.display = 'none';
+            }, 3000);
+        }
+
+        // Función para formatear números con separadores de miles y decimales
+        function formatNumber(number, decimals = 2) {
+            if (isNaN(number) || number === null) return '0.00';
+
+            return number.toLocaleString('es-VE', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        // ==========================================
+        // LÓGICA DE ALMACENAMIENTO LOCAL
+        // ==========================================
+
+        // Guardar datos en localStorage
+        function saveToLocalStorage() {
+            try {
+                // Actualizar datos antes de guardar
+                persistentData.dollarRate = parseFloat(document.getElementById('dollarRate').value) || 36.50;
+                persistentData.ivaPercentage = parseFloat(document.getElementById('ivaPercentage').value) || 16;
+                
+                localStorage.setItem('meygoData', JSON.stringify(persistentData));
+                showStatus('Datos guardados localmente');
+                return true;
+            } catch (error) {
+                console.error('Error al guardar en localStorage:', error);
+                showStatus('Error al guardar datos', 'error');
+                return false;
+            }
+        }
+
+        // Cargar datos desde localStorage
+        function loadFromLocalStorage() {
+            try {
+                const savedData = localStorage.getItem('meygoData');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    
+                    // Mezclar datos guardados con defaults
+                    persistentData = {
+                        ...persistentData,
+                        ...parsedData
+                    };
+                    
+                    // Asegurar que todas las propiedades existan
+                    if (!persistentData.controlNumbers) persistentData.controlNumbers = { presupuesto: 0, factura: 0, nota: 0 };
+                    if (!persistentData.clients) persistentData.clients = [];
+                    if (!persistentData.documents) persistentData.documents = [];
+                    if (!persistentData.suppliers) persistentData.suppliers = [];
+                    if (!persistentData.catalog) persistentData.catalog = [];
+                    
+                    controlNumbers = persistentData.controlNumbers;
+                    
+                    updateUIFromData();
+                    showStatus('Datos cargados correctamente');
+                    return true;
                 }
+            } catch (error) {
+                console.error('Error al cargar desde localStorage:', error);
             }
-            renderizarInterfaz();
-            actualizarSelectVentas();
-        };
-
-        // --- FUNCIONES DE PERSISTENCIA ---
-        function guardar() {
-            data.tasa = parseFloat(document.getElementById('tasaCambio').value) || 4200;
-            localStorage.setItem('effata_system_db', JSON.stringify(data));
-            renderizarInterfaz();
+            return false;
         }
 
-        // --- NAVEGACIÓN ---
-        function cambiarVista(id, btn) {
-            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item-btn').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + id).classList.add('active');
-            btn.classList.add('active');
-            
-            if (id === 'ventas') {
-                actualizarSelectVentas();
+        // Respaldar datos (descargar archivo JSON)
+        function backupData() {
+            try {
+                const dataStr = JSON.stringify(persistentData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `meygo_backup_${new Date().toISOString().slice(0,10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                
+                showStatus('Respaldo descargado correctamente');
+            } catch (error) {
+                console.error('Error al respaldar datos:', error);
+                showStatus('Error al respaldar datos', 'error');
             }
         }
 
-        // --- CONVERSIÓN DE UNIDADES ---
-        function convertirUnidades(cantidad, unidadOrigen, unidadDestino) {
-            if (unidadOrigen === unidadDestino) return cantidad;
+        // Restaurar datos desde archivo
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
             
-            if (CONVERSIONES[unidadOrigen] && CONVERSIONES[unidadOrigen][unidadDestino]) {
-                return cantidad * CONVERSIONES[unidadOrigen][unidadDestino];
-            }
+            input.onchange = function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const restoredData = JSON.parse(e.target.result);
+                        
+                        // Validar estructura básica
+                        if (restoredData && typeof restoredData === 'object') {
+                            if (confirm('¿Está seguro de restaurar estos datos? Se sobrescribirán los datos actuales.')) {
+                                persistentData = restoredData;
+                                controlNumbers = persistentData.controlNumbers;
+                                saveToLocalStorage();
+                                updateUIFromData();
+                                showStatus('Datos restaurados correctamente');
+                            }
+                        } else {
+                            showStatus('Archivo no válido', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error al restaurar datos:', error);
+                        showStatus('Error al restaurar datos', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
             
-            const solidas = ['kg', 'g', 'lb', 'oz'];
-            const liquidas = ['lt', 'ml'];
-            
-            if (solidas.includes(unidadOrigen) && solidas.includes(unidadDestino)) {
-                const enGramos = cantidad * (CONVERSIONES[unidadOrigen]?.['g'] || 1);
-                return enGramos / (CONVERSIONES[unidadDestino]?.['g'] || 1);
-            }
-            
-            if (liquidas.includes(unidadOrigen) && liquidas.includes(unidadDestino)) {
-                const enMl = cantidad * (CONVERSIONES[unidadOrigen]?.['ml'] || 1000);
-                return enMl / (CONVERSIONES[unidadDestino]?.['ml'] || 1000);
-            }
-            
-            console.warn(`No se puede convertir de ${unidadOrigen} a ${unidadDestino}`);
-            return cantidad;
+            input.click();
         }
 
-        // --- INVENTARIO ---
-        function agregarIngrediente() {
-            const nombre = document.getElementById('invNombre').value.trim();
-            const costoTotal = parseFloat(document.getElementById('invCosto').value);
-            const moneda = document.getElementById('invMoneda').value;
-            const cantidad = parseFloat(document.getElementById('invCantidad').value);
-            const unidad = document.getElementById('invUnidad').value;
+        // Limpiar todos los datos
+        function clearAllData() {
+            if (confirm('¿ESTÁ SEGURO? Esto eliminará TODOS los datos (clientes, historial, catálogo). Esta acción no se puede deshacer.')) {
+                localStorage.removeItem('meygoData');
+                persistentData = {
+                    controlNumbers: { presupuesto: 0, factura: 0, nota: 0 },
+                    dollarRate: 36.50,
+                    paymentInfo: [
+                        "CUENTA CORRIENTE BANCAMIGA Nº 01720110791109143634",
+                        "A NOMBRE DE SUMINISTROS MEYGO RIF J-410220430",
+                        "TASA BCV DEL DIA"
+                    ],
+                    clients: [],
+                    documents: [],
+                    suppliers: [],
+                    catalog: []
+                };
+                controlNumbers = persistentData.controlNumbers;
+                updateUIFromData();
+                showStatus('Todos los datos han sido eliminados', 'warning');
+            }
+        }
 
-            if(!nombre || nombre.length < 2) {
-                mostrarError('El nombre debe tener al menos 2 caracteres');
-                return;
-            }
+        // Actualizar UI con datos cargados
+        function updateUIFromData() {
+            // Tasa Dólar
+            document.getElementById('dollarRate').value = persistentData.dollarRate;
             
-            if(isNaN(costoTotal) || costoTotal <= 0) {
-                mostrarError('Ingrese un costo válido mayor a 0');
-                return;
+            // Porcentaje de IVA
+            document.getElementById('ivaPercentage').value = persistentData.ivaPercentage || 16;
+
+            // Crear Payment Info
+            renderPaymentInfo();
+
+            // Números de Control (Display)
+            updateControlNumberDisplay();
+
+            // Recalcular si hay productos
+            if (products.length > 0) {
+                updateTotals();
             }
-            
-            if(isNaN(cantidad) || cantidad <= 0) {
-                mostrarError('Ingrese una cantidad válida mayor a 0');
+
+            // Renderizar Historial
+            renderHistory();
+
+            // Cargar clientes
+            loadClients();
+
+            // Cargar catálogo
+            loadCatalog();
+
+            // Actualizar display según método de pago
+            updateDisplay();
+        }
+
+        // Renderizar Información de Pago
+        function renderPaymentInfo() {
+            const container = document.getElementById('paymentDetailsContainer');
+            container.innerHTML = '';
+
+            persistentData.paymentInfo.forEach(line => {
+                const div = document.createElement('div');
+                div.innerHTML = `<i class="fas fa-check-circle"></i> ${line}`;
+                div.style.display = 'flex';
+                div.style.alignItems = 'center';
+                div.style.gap = '10px';
+                div.style.fontSize = '14px';
+                container.appendChild(div);
+            });
+        }
+
+        // Función auxiliar para actualizar el display del número de control
+        function updateControlNumberDisplay() {
+            const currentYear = new Date().getFullYear().toString().slice(-2);
+            const nextNumber = parseInt(controlNumbers[currentDocType]) + 1;
+            document.getElementById('controlNumberDisplay').textContent =
+                `${nextNumber.toString().padStart(4, '0')}/${currentYear}`;
+        }
+
+        // Función para cargar clientes en el selector
+        function loadClients() {
+            const clientSelect = document.getElementById('clientSelect');
+            clientSelect.innerHTML = '<option value="">Seleccione un cliente</option>';
+
+            const currentClients = persistentData.clients || [];
+            currentClients.forEach((client, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = client.name + (client.rif ? ` (${client.rif})` : '');
+                clientSelect.appendChild(option);
+            });
+        }
+
+        // Función para cargar datos de un cliente
+        function loadClientData(index) {
+            const currentClients = persistentData.clients || [];
+            if (index >= 0 && index < currentClients.length) {
+                const client = currentClients[index];
+                document.getElementById('clientName').value = client.name || '';
+                document.getElementById('clientAddress').value = client.address || '';
+                document.getElementById('clientRIF').value = client.rif || '';
+            }
+        }
+
+        // Función para guardar el cliente actual
+        function saveCurrentClient() {
+            const name = document.getElementById('clientName').value.trim();
+            const address = document.getElementById('clientAddress').value.trim();
+            const rif = document.getElementById('clientRIF').value.trim();
+
+            if (!name) {
+                alert('Por favor ingrese el nombre del cliente');
                 return;
             }
 
-            const productoExistente = data.inventario.find(item => 
-                item.nombre.toLowerCase() === nombre.toLowerCase()
+            if (!persistentData.clients) persistentData.clients = [];
+
+            // Verificar si el cliente ya existe
+            const existingIndex = persistentData.clients.findIndex(client =>
+                client.name.toLowerCase() === name.toLowerCase()
             );
 
-            if (productoExistente) {
-                Swal.fire({
-                    title: 'Producto Existente',
-                    text: `"${nombre}" ya existe en el inventario. ¿Qué deseas hacer?`,
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Actualizar existente',
-                    cancelButtonText: 'Crear como nuevo',
-                    showDenyButton: true,
-                    denyButtonText: 'Cancelar'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        actualizarProductoExistente(productoExistente, costoTotal, moneda, cantidad, unidad);
-                    } else if (result.dismiss === Swal.DismissReason.cancel) {
-                        crearNuevoProducto(nombre, costoTotal, moneda, cantidad, unidad);
-                    }
-                });
+            if (existingIndex !== -1) {
+                // Actualizar cliente existente
+                persistentData.clients[existingIndex] = { name, address, rif };
+                showStatus('Cliente actualizado correctamente');
+            } else {
+                // Agregar nuevo cliente
+                persistentData.clients.push({ name, address, rif });
+                showStatus('Cliente guardado correctamente');
+            }
+
+            saveToLocalStorage();
+            loadClients();
+        }
+
+        // ==========================================
+        // GESTIÓN DE CATÁLOGO DE PRODUCTOS/PROVEEDORES
+        // ==========================================
+
+        // Cargar catálogo en el selector
+        function loadCatalog() {
+            const catalogSelect = document.getElementById('catalogSelect');
+            catalogSelect.innerHTML = '<option value="">Seleccione del catálogo para agregar rápido</option>';
+
+            const currentCatalog = persistentData.catalog || [];
+            currentCatalog.forEach((item, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = `${item.product} (${item.supplier}) - $${formatNumber(item.cost)}`;
+                catalogSelect.appendChild(option);
+            });
+        }
+
+        // Agregar producto al catálogo
+        function addToCatalog() {
+            const supplier = document.getElementById('supplierName').value.trim();
+            const product = document.getElementById('productCatalog').value.trim();
+            const cost = parseFloat(document.getElementById('productCost').value);
+
+            if (!supplier || !product || isNaN(cost) || cost <= 0) {
+                alert('Por favor complete todos los campos del catálogo con valores válidos');
                 return;
             }
 
-            crearNuevoProducto(nombre, costoTotal, moneda, cantidad, unidad, true);
+            if (!persistentData.catalog) persistentData.catalog = [];
+
+            // Verificar si el producto ya existe en el catálogo
+            const existingIndex = persistentData.catalog.findIndex(item =>
+                item.product.toLowerCase() === product.toLowerCase() &&
+                item.supplier.toLowerCase() === supplier.toLowerCase()
+            );
+
+            if (existingIndex !== -1) {
+                // Actualizar producto existente
+                persistentData.catalog[existingIndex] = { supplier, product, cost };
+                showStatus('Producto actualizado en catálogo');
+            } else {
+                // Agregar nuevo producto
+                persistentData.catalog.push({ supplier, product, cost });
+                showStatus('Producto agregado al catálogo');
+            }
+
+            saveToLocalStorage();
+            loadCatalog();
+            
+            // Limpiar campos
+            document.getElementById('productCatalog').value = '';
+            document.getElementById('productCost').value = '';
         }
 
-        function mostrarError(mensaje) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: mensaje,
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-
-        function actualizarProductoExistente(producto, costoTotal, moneda, cantidad, unidad) {
-            const tasa = data.tasa;
-            const costoUSD = moneda === 'COP' ? costoTotal / tasa : costoTotal;
-            
-            const cantidadConvertida = convertirUnidades(cantidad, unidad, producto.unidad);
-            
-            const costoExistente = producto.costoUnitarioUSD * producto.cantidad;
-            const costoNuevo = costoUSD;
-            const cantidadTotal = producto.cantidad + cantidadConvertida;
-            const costoUnitarioPromedio = (costoExistente + costoNuevo) / cantidadTotal;
-            
-            producto.costoUnitarioUSD = costoUnitarioPromedio;
-            producto.cantidad += cantidadConvertida;
-            
-            data.movimientos.push({
-                tipo: 'compra',
-                detalle: `Reabastecimiento: ${producto.nombre} - ${cantidad} ${unidad}`,
-                monto: costoUSD,
-                fecha: new Date().toISOString()
-            });
-            
-            limpiar(['invNombre', 'invCosto', 'invCantidad']);
-            guardar();
-            
-            Swal.fire({
-                icon: 'success',
-                title: 'Actualizado',
-                text: `Se actualizó ${producto.nombre}`,
-                toast: true,
-                position: 'top',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        function crearNuevoProducto(nombre, costoTotal, moneda, cantidad, unidad, mostrarMensaje = false) {
-            const tasa = data.tasa;
-            const costoUSD = moneda === 'COP' ? costoTotal / tasa : costoTotal;
-            const costoUnitario = costoUSD / cantidad;
-
-            data.inventario.push({
-                id: Date.now() + Math.random(),
-                nombre,
-                costoUnitarioUSD: costoUnitario,
-                cantidad,
-                unidad,
-                unidadBase: unidad
-            });
-
-            data.movimientos.push({
-                tipo: 'compra',
-                detalle: `Compra: ${nombre} - ${cantidad} ${unidad}`,
-                monto: costoUSD,
-                fecha: new Date().toISOString()
-            });
-
-            limpiar(['invNombre', 'invCosto', 'invCantidad']);
-            guardar();
-            
-            if (mostrarMensaje) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Guardado',
-                    toast: true,
-                    position: 'top',
-                    timer: 1500,
-                    showConfirmButton: false
-                });
+        // Cargar producto desde catálogo
+        function loadProductFromCatalog(index) {
+            const currentCatalog = persistentData.catalog || [];
+            if (index >= 0 && index < currentCatalog.length) {
+                const item = currentCatalog[index];
+                document.getElementById('productName').value = item.product;
+                
+                // Determinar qué precio mostrar según el método de pago
+                if (currentPaymentMethod === 'bolivares') {
+                    // Para pago en bolívares, mostrar el costo en BS (asumiendo que el catálogo está en USD)
+                    const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+                    document.getElementById('productPrice').value = (item.cost * dollarRate).toFixed(2);
+                } else {
+                    // Para pago en dólares o mixto, mostrar en USD
+                    document.getElementById('productPrice').value = item.cost;
+                }
+                
+                document.getElementById('productQuantity').value = 1;
+                document.getElementById('productUnit').value = 'Unidad';
+                showStatus('Producto cargado desde catálogo');
             }
         }
 
-        async function modalBaja() {
-            if(data.inventario.length === 0) {
-                Swal.fire('Vacío', 'No hay inventario registrado', 'warning');
-                return;
+        // ==========================================
+        // FUNCIONES PRINCIPALES DEL SISTEMA
+        // ==========================================
+
+        // Cambiar tipo de documento
+        function changeDocumentType(newDocType) {
+            // Limpiar todos los datos del documento anterior
+            products = [];
+            document.getElementById('productsList').innerHTML = '';
+            document.getElementById('productName').value = '';
+            document.getElementById('productQuantity').value = '1';
+            document.getElementById('productUnit').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productIVA').checked = false;
+
+            // Actualizar el tipo de documento actual
+            currentDocType = newDocType;
+
+            // Actualizar el título del documento
+            const documentTitle = document.getElementById('documentTitle');
+            switch (currentDocType) {
+                case 'factura':
+                    documentTitle.textContent = 'FACTURA';
+                    break;
+                case 'nota':
+                    documentTitle.textContent = 'NOTA DE ENTREGA';
+                    break;
+                default:
+                    documentTitle.textContent = 'PRESUPUESTO';
             }
 
-            const opciones = data.inventario.map(i => 
-                `<option value="${i.id}">${i.nombre} (Stock: ${i.cantidad.toFixed(2)} ${i.unidad})</option>`
-            ).join('');
+            updateControlNumberDisplay();
+            updateTotals();
+            updateTableStructure();
+        }
 
-            const { value: formValues } = await Swal.fire({
-                title: 'Registrar Baja',
-                html: `<select id="bajaId" class="swal2-input mb-2">${opciones}</select>
-                       <input id="bajaCant" type="number" placeholder="Cantidad" class="swal2-input mb-2" step="0.01" min="0.01">
-                       <select id="bajaUnidad" class="swal2-input mb-2">
-                           <option value="kg">kg</option>
-                           <option value="g">g</option>
-                           <option value="lb">lb</option>
-                           <option value="oz">oz</option>
-                           <option value="und">und</option>
-                           <option value="lt">lt</option>
-                           <option value="ml">ml</option>
-                       </select>
-                       <input id="bajaRazon" placeholder="Razón (ej: Vencimiento)" class="swal2-input">`,
-                focusConfirm: false,
-                showCancelButton: true,
-                confirmButtonText: 'Registrar',
-                cancelButtonText: 'Cancelar',
-                preConfirm: () => {
-                    const id = document.getElementById('bajaId').value;
-                    const cant = document.getElementById('bajaCant').value;
-                    const unidadBaja = document.getElementById('bajaUnidad').value;
-                    const razon = document.getElementById('bajaRazon').value;
-                    
-                    if(!id || !cant || !unidadBaja) {
-                        Swal.showValidationMessage('Complete todos los campos');
+        // Cambiar método de pago
+        function changePaymentMethod(newPaymentMethod) {
+            if (currentPaymentMethod !== newPaymentMethod) {
+                if (products.length > 0) {
+                    if (!confirm('Al cambiar el método de pago se limpiarán los productos actuales. ¿Desea continuar?')) {
                         return false;
                     }
-                    
-                    return [id, cant, unidadBaja, razon];
                 }
-            });
-
-            if (formValues) {
-                const [id, cant, unidadBaja, razon] = formValues;
-                const cantidad = parseFloat(cant);
-                const item = data.inventario.find(i => i.id == id);
                 
-                if(item) {
-                    const cantidadConvertida = convertirUnidades(cantidad, unidadBaja, item.unidad);
-                    
-                    if(cantidadConvertida > 0 && item.cantidad >= cantidadConvertida) {
-                        item.cantidad -= cantidadConvertida;
-                        const perdida = item.costoUnitarioUSD * cantidadConvertida;
-                        
-                        data.movimientos.push({
-                            tipo: 'baja',
-                            detalle: `Baja: ${item.nombre} - ${cantidad} ${unidadBaja}`,
-                            razon: razon || 'Sin especificar',
-                            monto: perdida,
-                            fecha: new Date().toISOString()
-                        });
-                        
-                        if (item.cantidad <= 0) {
-                            data.inventario = data.inventario.filter(i => i.id != id);
-                        }
-                        
-                        guardar();
-                        Swal.fire('Registrado', 'Stock descontado correctamente', 'success');
-                    } else {
-                        Swal.fire('Error', 'Cantidad inválida o insuficiente stock', 'error');
-                    }
-                }
+                currentPaymentMethod = newPaymentMethod;
+                products = [];
+                updateProductsTable();
+                updateTotals();
+                updateDisplay();
+                updateTableStructure();
+                return true;
             }
+            return false;
         }
 
-        // --- MENÚ ---
-        function agregarIngredienteTemp() {
-            const select = document.getElementById('selIngrediente');
-            const id = select.value;
-            
-            if (!id) {
-                mostrarError('Selecciona un ingrediente primero');
-                return;
-            }
-            
-            const item = data.inventario.find(i => i.id == parseInt(id));
-            if (!item) return;
-            
-            const cantidadInput = parseFloat(document.getElementById('cantIngrediente').value);
-            const unidadSeleccionada = document.getElementById('unidadIngrediente').value;
-            
-            if (!cantidadInput || cantidadInput <= 0) {
-                mostrarError('Ingresa una cantidad válida');
-                return;
-            }
+        // Actualizar la estructura de la tabla según el método de pago
+        function updateTableStructure() {
+            const tableHead = document.getElementById('productsTableHead');
+            const tableBody = document.getElementById('productsList');
 
-            if (recetaTemp.some(ing => ing.invId === item.id)) {
-                mostrarError('Este ingrediente ya fue agregado a la receta');
-                return;
-            }
-
-            const cantidadEnUnidadBase = convertirUnidades(cantidadInput, unidadSeleccionada, item.unidad);
-            
-            recetaTemp.push({
-                invId: item.id,
-                nombre: item.nombre,
-                cantidad: cantidadEnUnidadBase,
-                unidadOriginal: unidadSeleccionada,
-                cantidadOriginal: cantidadInput
-            });
-            
-            actualizarVistaTemp();
-            document.getElementById('cantIngrediente').value = '';
-        }
-
-        function actualizarVistaTemp() {
-            const container = document.getElementById('listaTempIngredientes');
-            container.innerHTML = recetaTemp.map((ing, idx) => {
-                const item = data.inventario.find(i => i.id === ing.invId);
-                const cantidadMostrar = item ? convertirUnidades(ing.cantidad, item.unidad, ing.unidadOriginal) : ing.cantidadOriginal;
-                
-                return `<span class="ing-tag">${ing.nombre}: ${cantidadMostrar.toFixed(2)} ${ing.unidadOriginal} 
-                    <i class="fas fa-times text-danger ms-1" onclick="eliminarIngredienteTemp(${idx})" style="cursor:pointer"></i>
-                </span>`;
-            }).join('');
-        }
-
-        function eliminarIngredienteTemp(index) {
-            recetaTemp.splice(index, 1);
-            actualizarVistaTemp();
-        }
-
-        function guardarPlatoCompleto() {
-            const nombre = document.getElementById('platoNombre').value.trim();
-            const precio = parseFloat(document.getElementById('platoPrecio').value);
-            const moneda = document.getElementById('platoMoneda').value;
-
-            if(!nombre || nombre.length < 2) {
-                mostrarError('Ingrese un nombre válido para el plato');
-                return;
-            }
-            
-            if(!precio || precio <= 0) {
-                mostrarError('El precio debe ser mayor a 0');
-                return;
-            }
-
-            if (recetaTemp.length === 0) {
-                mostrarError('Agregue al menos un ingrediente al plato');
-                return;
-            }
-
-            const precioUSD = moneda === 'COP' ? precio / data.tasa : precio;
-            
-            data.menu.push({
-                id: Date.now() + Math.random(),
-                nombre,
-                precioUSD,
-                ingredientes: [...recetaTemp]
-            });
-
-            recetaTemp = [];
-            actualizarVistaTemp();
-            limpiar(['platoNombre', 'platoPrecio']);
-            guardar();
-            
-            Swal.fire({
-                title: '¡Éxito!',
-                text: 'Plato guardado en el menú',
-                icon: 'success',
-                timer: 1500,
-                showConfirmButton: false
-            });
-        }
-
-        // --- VENTAS ---
-        function modificarCant(valor) {
-            const input = document.getElementById('cantVenta');
-            let nuevaCantidad = parseInt(input.value) + valor;
-            if(nuevaCantidad < 1) nuevaCantidad = 1;
-            input.value = nuevaCantidad;
-            verificarStock();
-        }
-
-        function actualizarSelectVentas() {
-            const selectVentas = document.getElementById('selVenta');
-            selectVentas.innerHTML = '<option value="">-- Seleccionar --</option>';
-            
-            data.menu.forEach((plato, indice) => {
-                const precioCOP = plato.precioUSD * data.tasa;
-                selectVentas.innerHTML += `
-                    <option value="${indice}">${plato.nombre} - ${formatearMoneda(precioCOP)}</option>
+            if (currentPaymentMethod === 'mixto') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Precio Unitario ($)</th>
+                        <th>Precio Unitario (BS)</th>
+                        <th>Precio Total ($)</th>
+                        <th>Precio Total (BS)</th>
+                        <th>Acciones</th>
+                    </tr>
                 `;
-            });
-            
-            selectVentas.addEventListener('change', verificarStock);
-        }
-
-        function verificarStock() {
-            const indice = document.getElementById('selVenta').value;
-            const cantidad = parseInt(document.getElementById('cantVenta').value);
-            const infoStock = document.getElementById('infoStock');
-            
-            if(indice === "" || indice === null) {
-                infoStock.textContent = 'Seleccione un producto';
-                infoStock.className = 'text-muted';
-                return;
-            }
-            
-            const plato = data.menu[indice];
-            let hayStock = true;
-            let ingredientesFaltantes = [];
-
-            plato.ingredientes.forEach(ing => {
-                const itemInventario = data.inventario.find(i => i.id == ing.invId);
-                
-                if(!itemInventario) {
-                    hayStock = false;
-                    ingredientesFaltantes.push(`${ing.nombre} (no existe)`);
-                } else {
-                    const cantidadNecesaria = ing.cantidad * cantidad;
-                    if(itemInventario.cantidad < cantidadNecesaria) {
-                        hayStock = false;
-                        const cantidadMostrar = convertirUnidades(cantidadNecesaria, itemInventario.unidad, ing.unidadOriginal || 'g');
-                        const stockMostrar = convertirUnidades(itemInventario.cantidad, itemInventario.unidad, ing.unidadOriginal || 'g');
-                        ingredientesFaltantes.push(`${ing.nombre} (necesita: ${cantidadMostrar.toFixed(2)} ${ing.unidadOriginal || 'g'})`);
-                    }
-                }
-            });
-
-            if(hayStock) {
-                infoStock.textContent = 'Stock disponible ✓';
-                infoStock.className = 'text-success';
+            } else if (currentPaymentMethod === 'bolivares') {
+                tableHead.innerHTML = `
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Precio Unitario (BS)</th>
+                        <th>Precio Total (BS)</th>
+                        <th>Acciones</th>
+                    </tr>
+                `;
             } else {
-                infoStock.textContent = 'Stock insuficiente';
-                infoStock.className = 'text-danger';
+                tableHead.innerHTML = `
+                    <tr>
+                        <th>Descripción</th>
+                        <th>Cantidad</th>
+                        <th>Unidad</th>
+                        <th>Precio Unitario ($)</th>
+                        <th>Precio Total ($)</th>
+                        <th>Acciones</th>
+                    </tr>
+                `;
             }
+
+            // Volver a renderizar los productos con la nueva estructura
+            updateProductsTable();
         }
 
-        function procesarVenta() {
-            const indice = document.getElementById('selVenta').value;
-            const cantidad = parseInt(document.getElementById('cantVenta').value);
-            
-            if(indice === "" || indice === null) {
-                mostrarError('Seleccione un producto del menú');
+        // Función para agregar producto
+        function addProduct() {
+            const name = document.getElementById('productName').value.trim();
+            const quantity = parseFloat(document.getElementById('productQuantity').value);
+            const unit = document.getElementById('productUnit').value.trim();
+            const hasIVA = document.getElementById('productIVA').checked;
+
+            // Validaciones
+            if (!name) {
+                alert('Por favor ingrese la descripción del producto/servicio');
                 return;
             }
-            
-            const plato = data.menu[indice];
-            let hayStock = true;
-            let ingredientesFaltantes = [];
 
-            plato.ingredientes.forEach(ing => {
-                const itemInventario = data.inventario.find(i => i.id == ing.invId);
-                
-                if(!itemInventario) {
-                    hayStock = false;
-                    ingredientesFaltantes.push(`${ing.nombre} (no existe en inventario)`);
+            if (isNaN(quantity) || quantity <= 0) {
+                alert('Por favor ingrese una cantidad válida');
+                return;
+            }
+
+            if (!unit) {
+                alert('Por favor ingrese la unidad de medida');
+                return;
+            }
+
+            // Obtener tasa de dólar y porcentaje de IVA
+            const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+            const ivaPercentage = parseFloat(document.getElementById('ivaPercentage').value) || 0;
+
+            // Obtener precio según el método de pago
+            let priceUSD, priceBS;
+
+            if (currentPaymentMethod === 'bolivares') {
+                // El precio ingresado es en BS directamente
+                priceBS = parseFloat(document.getElementById('productPrice').value);
+                if (isNaN(priceBS) || priceBS < 0) {
+                    alert('Por favor ingrese un precio válido en bolívares');
+                    return;
+                }
+                // Para pago en BS, el precio en USD no se calcula (se mantiene como 0 o se podría calcular inversamente si se necesita)
+                priceUSD = 0; // No se usa para pago en BS
+            } else if (currentPaymentMethod === 'dolares') {
+                // El precio ingresado es en USD directamente
+                priceUSD = parseFloat(document.getElementById('productPrice').value);
+                if (isNaN(priceUSD) || priceUSD < 0) {
+                    alert('Por favor ingrese un precio válido en dólares');
+                    return;
+                }
+                // Para pago en USD, el precio en BS no se calcula
+                priceBS = 0; // No se usa para pago en USD
+            } else {
+                // Pago mixto: precio ingresado en USD, se convierte a BS
+                priceUSD = parseFloat(document.getElementById('productPrice').value);
+                if (isNaN(priceUSD) || priceUSD < 0) {
+                    alert('Por favor ingrese un precio válido en dólares');
+                    return;
+                }
+                // Convertir a BS usando la tasa actual
+                priceBS = priceUSD * dollarRate;
+            }
+
+            // Calcular subtotales
+            let productSubtotalUSD, productSubtotalBS;
+            
+            if (currentPaymentMethod === 'bolivares') {
+                productSubtotalBS = quantity * priceBS;
+                productSubtotalUSD = 0; // No se usa
+            } else if (currentPaymentMethod === 'dolares') {
+                productSubtotalUSD = quantity * priceUSD;
+                productSubtotalBS = 0; // No se usa
+            } else {
+                // Pago mixto
+                productSubtotalUSD = quantity * priceUSD;
+                productSubtotalBS = quantity * priceBS;
+            }
+
+            // Calcular IVA si aplica
+            let productIVA, productIVABS;
+            
+            if (currentPaymentMethod === 'bolivares') {
+                productIVABS = hasIVA ? productSubtotalBS * (ivaPercentage / 100) : 0;
+                productIVA = 0; // No se usa
+            } else if (currentPaymentMethod === 'dolares') {
+                productIVA = hasIVA ? productSubtotalUSD * (ivaPercentage / 100) : 0;
+                productIVABS = 0; // No se usa
+            } else {
+                // Pago mixto
+                productIVA = hasIVA ? productSubtotalUSD * (ivaPercentage / 100) : 0;
+                productIVABS = hasIVA ? productSubtotalBS * (ivaPercentage / 100) : 0;
+            }
+
+            // Crear objeto producto
+            const product = {
+                name,
+                quantity,
+                unit,
+                priceUSD,
+                priceBS,
+                subtotalUSD: productSubtotalUSD,
+                subtotalBS: productSubtotalBS,
+                hasIVA,
+                ivaUSD: productIVA,
+                ivaBS: productIVABS,
+                paymentMethod: currentPaymentMethod, // Guardar el método de pago usado
+                dollarRateAtAddition: currentPaymentMethod === 'mixto' ? dollarRate : null // Guardar tasa si es mixto
+            };
+
+            // Agregar a la lista
+            products.push(product);
+
+            // Actualizar la tabla y los totales
+            updateProductsTable();
+            updateTotals();
+
+            // Limpiar campos de entrada
+            document.getElementById('productName').value = '';
+            document.getElementById('productQuantity').value = '1';
+            document.getElementById('productUnit').value = '';
+            document.getElementById('productPrice').value = '';
+            document.getElementById('productIVA').checked = false;
+            
+            showStatus('Producto agregado correctamente');
+        }
+
+        // Función para actualizar la tabla de productos
+        function updateProductsTable() {
+            const productsList = document.getElementById('productsList');
+            productsList.innerHTML = '';
+
+            products.forEach((product, index) => {
+                const row = document.createElement('tr');
+
+                if (currentPaymentMethod === 'bolivares') {
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${formatNumber(product.quantity, 0)}</td>
+                        <td>${product.unit}</td>
+                        <td>BS ${formatNumber(product.priceBS)}</td>
+                        <td>BS ${formatNumber(product.subtotalBS)}</td>
+                        <td>
+                            <button class="btn btn-danger" data-index="${index}">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    `;
+                } else if (currentPaymentMethod === 'dolares') {
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${formatNumber(product.quantity, 0)}</td>
+                        <td>${product.unit}</td>
+                        <td>$${formatNumber(product.priceUSD)}</td>
+                        <td>$${formatNumber(product.subtotalUSD)}</td>
+                        <td>
+                            <button class="btn btn-danger" data-index="${index}">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    `;
                 } else {
-                    const cantidadNecesaria = ing.cantidad * cantidad;
-                    if(itemInventario.cantidad < cantidadNecesaria) {
-                        hayStock = false;
-                        const cantidadMostrar = convertirUnidades(cantidadNecesaria, itemInventario.unidad, ing.unidadOriginal || 'g');
-                        const stockMostrar = convertirUnidades(itemInventario.cantidad, itemInventario.unidad, ing.unidadOriginal || 'g');
-                        ingredientesFaltantes.push(`${ing.nombre} (necesita: ${cantidadMostrar.toFixed(2)} ${ing.unidadOriginal || 'g'}, tiene: ${stockMostrar.toFixed(2)} ${ing.unidadOriginal || 'g'})`);
+                    // Pago mixto
+                    // Si el producto fue agregado en otro método de pago, recalcular con tasa actual
+                    let displayPriceBS = product.priceBS;
+                    let displaySubtotalBS = product.subtotalBS;
+                    let displayIvaBS = product.ivaBS;
+                    
+                    // Si el producto no tiene tasa guardada o fue agregado en otro modo, recalcular
+                    if (!product.dollarRateAtAddition || product.paymentMethod !== 'mixto') {
+                        const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+                        displayPriceBS = product.priceUSD * dollarRate;
+                        displaySubtotalBS = product.subtotalUSD * dollarRate;
+                        displayIvaBS = product.ivaUSD * dollarRate;
                     }
+                    
+                    row.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${formatNumber(product.quantity, 0)}</td>
+                        <td>${product.unit}</td>
+                        <td>$${formatNumber(product.priceUSD)}</td>
+                        <td>BS ${formatNumber(displayPriceBS)}</td>
+                        <td>$${formatNumber(product.subtotalUSD)}</td>
+                        <td>BS ${formatNumber(displaySubtotalBS)}</td>
+                        <td>
+                            <button class="btn btn-danger" data-index="${index}">
+                                <i class="fas fa-trash"></i> Eliminar
+                            </button>
+                        </td>
+                    `;
                 }
+
+                productsList.appendChild(row);
             });
 
-            if(!hayStock) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Stock insuficiente',
-                    html: `Faltan:<br><small>${ingredientesFaltantes.join('<br>')}</small>`
+            // Agregar event listeners a los botones de eliminar
+            document.querySelectorAll('#productsList .btn-danger').forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    removeProduct(index);
                 });
-                return;
-            }
-
-            let costoTotal = 0;
-            plato.ingredientes.forEach(ing => {
-                const itemInventario = data.inventario.find(i => i.id == ing.invId);
-                const cantidadNecesaria = ing.cantidad * cantidad;
-                itemInventario.cantidad -= cantidadNecesaria;
-                costoTotal += (itemInventario.costoUnitarioUSD * cantidadNecesaria);
-                
-                if (itemInventario.cantidad <= 0) {
-                    data.inventario = data.inventario.filter(i => i.id != ing.invId);
-                }
-            });
-
-            const ventaTotal = plato.precioUSD * cantidad;
-            const ganancia = ventaTotal - costoTotal;
-
-            data.movimientos.push({
-                tipo: 'venta',
-                detalle: `${plato.nombre} x${cantidad}`,
-                monto: ventaTotal,
-                costo: costoTotal,
-                ganancia: ganancia,
-                fecha: new Date().toISOString()
-            });
-
-            document.getElementById('cantVenta').value = 1;
-            guardar();
-            actualizarSelectVentas();
-            
-            Swal.fire({
-                title: '¡Venta Exitosa!',
-                html: `Total: $${ventaTotal.toFixed(2)} USD<br>Ganancia: $${ganancia.toFixed(2)} USD`,
-                icon: 'success',
-                timer: 2000,
-                showConfirmButton: false
             });
         }
 
-        // --- RENDERIZADO ---
-        function renderizarInterfaz() {
-            const tasa = data.tasa;
-            
-            // Renderizar inventario
-            const listaInventario = document.getElementById('listaInventario');
-            const selectIngredientes = document.getElementById('selIngrediente');
-            
-            listaInventario.innerHTML = '';
-            selectIngredientes.innerHTML = '<option value="">Seleccionar...</option>';
-            
-            let valorTotalInventario = 0;
+        // Función para eliminar producto
+        function removeProduct(index) {
+            if (confirm('¿Está seguro de que desea eliminar este producto?')) {
+                products.splice(index, 1);
+                updateProductsTable();
+                updateTotals();
+                showStatus('Producto eliminado');
+            }
+        }
 
-            data.inventario.forEach(item => {
-                valorTotalInventario += (item.costoUnitarioUSD * item.cantidad);
+        // Función para actualizar los totales
+        function updateTotals() {
+            // Obtener tasa de dólar actual para conversiones
+            const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+            const ivaPercentage = parseFloat(document.getElementById('ivaPercentage').value) || 0;
+            
+            document.getElementById('ivaPercent').textContent = ivaPercentage;
+
+            // Calcular subtotales y totales según el método de pago
+            if (currentPaymentMethod === 'bolivares') {
+                // Solo BS
+                subtotalBS = products.reduce((total, product) => total + product.subtotalBS, 0);
+                subtotalUSD = 0;
                 
-                const cantidadEnGramos = convertirUnidades(item.cantidad, item.unidad, 'g');
+                ivaAmount = products.reduce((total, product) => total + (product.hasIVA ? product.ivaBS : 0), 0);
+                totalBS = subtotalBS + ivaAmount;
+                totalUSD = 0;
+            } else if (currentPaymentMethod === 'dolares') {
+                // Solo USD
+                subtotalUSD = products.reduce((total, product) => total + product.subtotalUSD, 0);
+                subtotalBS = 0;
                 
-                listaInventario.innerHTML += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>${item.nombre}</strong>
-                            <small class="text-muted">(${item.cantidad.toFixed(2)} ${item.unidad} ≈ ${cantidadEnGramos.toFixed(0)}g)</small>
+                ivaAmount = products.reduce((total, product) => total + (product.hasIVA ? product.ivaUSD : 0), 0);
+                totalUSD = subtotalUSD + ivaAmount;
+                totalBS = 0;
+            } else {
+                // Mixto: calcular en ambas monedas
+                subtotalUSD = products.reduce((total, product) => total + product.subtotalUSD, 0);
+                ivaAmount = products.reduce((total, product) => total + (product.hasIVA ? product.ivaUSD : 0), 0);
+                totalUSD = subtotalUSD + ivaAmount;
+                
+                // Para BS, recalcular usando la tasa actual
+                subtotalBS = products.reduce((total, product) => {
+                    if (product.dollarRateAtAddition && product.paymentMethod === 'mixto') {
+                        // Si fue agregado en mixto con tasa específica, usar esa
+                        return total + product.subtotalBS;
+                    } else {
+                        // Recalcular con tasa actual
+                        return total + (product.subtotalUSD * dollarRate);
+                    }
+                }, 0);
+                
+                const ivaAmountBS = products.reduce((total, product) => {
+                    if (product.dollarRateAtAddition && product.paymentMethod === 'mixto') {
+                        return total + (product.hasIVA ? product.ivaBS : 0);
+                    } else {
+                        return total + (product.hasIVA ? product.ivaUSD * dollarRate : 0);
+                    }
+                }, 0);
+                
+                totalBS = subtotalBS + ivaAmountBS;
+            }
+
+            // Actualizar UI
+            updateDisplay();
+        }
+
+        // Función para actualizar la visualización según el método de pago
+        function updateDisplay() {
+            const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+            const productPriceLabel = document.getElementById('productPriceLabel');
+            const priceRateInfo = document.getElementById('priceRateInfo');
+            const dollarRateContainer = document.getElementById('dollarRateContainer');
+
+            // Mostrar/ocultar campos según método de pago
+            if (currentPaymentMethod === 'bolivares') {
+                dollarRateContainer.style.display = 'none';
+                productPriceLabel.textContent = 'Precio Unitario (BS)';
+                productPriceLabel.style.color = 'var(--color-warning)';
+                priceRateInfo.textContent = 'Ingrese el precio directamente en bolívares';
+                priceRateInfo.style.color = 'var(--color-warning)';
+
+                // Actualizar valores en BS
+                document.getElementById('subtotalDisplay').textContent = `BS ${formatNumber(subtotalBS)}`;
+                document.getElementById('ivaAmount').textContent = `BS ${formatNumber(ivaAmount)}`;
+                document.getElementById('totalAmount').textContent = `BS ${formatNumber(totalBS)}`;
+
+                // Ocultar conversión de moneda
+                document.getElementById('currencyDisplay').innerHTML = '';
+            } else if (currentPaymentMethod === 'dolares') {
+                dollarRateContainer.style.display = 'none';
+                productPriceLabel.textContent = 'Precio Unitario ($)';
+                productPriceLabel.style.color = 'var(--color-success)';
+                priceRateInfo.textContent = 'Ingrese el precio directamente en dólares';
+                priceRateInfo.style.color = 'var(--color-success)';
+
+                // Actualizar valores en USD
+                document.getElementById('subtotalDisplay').textContent = `$${formatNumber(subtotalUSD)}`;
+                document.getElementById('ivaAmount').textContent = `$${formatNumber(ivaAmount)}`;
+                document.getElementById('totalAmount').textContent = `$${formatNumber(totalUSD)}`;
+
+                // Ocultar conversión de moneda
+                document.getElementById('currencyDisplay').innerHTML = '';
+            } else {
+                // Pago mixto
+                dollarRateContainer.style.display = 'flex';
+                productPriceLabel.textContent = 'Precio Unitario ($)';
+                productPriceLabel.style.color = 'var(--color-primary)';
+                priceRateInfo.textContent = `El precio en BS se calculará automáticamente usando la tasa: ${formatNumber(dollarRate)} Bs/$`;
+                priceRateInfo.style.color = 'var(--color-primary)';
+
+                // Actualizar valores en USD
+                document.getElementById('subtotalDisplay').textContent = `$${formatNumber(subtotalUSD)}`;
+                document.getElementById('ivaAmount').textContent = `$${formatNumber(ivaAmount)}`;
+                document.getElementById('totalAmount').textContent = `$${formatNumber(totalUSD)}`;
+
+                // Calcular iva en BS para mostrar
+                const ivaAmountBS = products.reduce((total, product) => {
+                    if (product.dollarRateAtAddition && product.paymentMethod === 'mixto') {
+                        return total + (product.hasIVA ? product.ivaBS : 0);
+                    } else {
+                        return total + (product.hasIVA ? product.ivaUSD * dollarRate : 0);
+                    }
+                }, 0);
+
+                // Mostrar conversión de moneda
+                document.getElementById('currencyDisplay').innerHTML = `
+                    <div class="dual-currency">
+                        <div class="currency-box">
+                            <div class="currency-label">TOTAL EN DÓLARES</div>
+                            <div class="currency-value">$${formatNumber(totalUSD)}</div>
                         </div>
-                        <span class="badge bg-secondary">$${(item.costoUnitarioUSD * item.cantidad).toFixed(2)} USD</span>
-                    </li>
-                `;
-                
-                selectIngredientes.innerHTML += `
-                    <option value="${item.id}">${item.nombre} (${item.cantidad.toFixed(2)} ${item.unidad})</option>
-                `;
-            });
-
-            document.getElementById('totalItems').textContent = `${data.inventario.length} items`;
-            document.getElementById('finInversion').innerText = `$${valorTotalInventario.toFixed(2)} USD`;
-
-            // Renderizar menú
-            const listaMenu = document.getElementById('listaMenu');
-            listaMenu.innerHTML = '';
-
-            data.menu.forEach((plato, indice) => {
-                let costoPlato = 0;
-                
-                plato.ingredientes.forEach(ing => {
-                    const ingrediente = data.inventario.find(x => x.id == ing.invId);
-                    if(ingrediente) {
-                        costoPlato += (ingrediente.costoUnitarioUSD * ing.cantidad);
-                    }
-                });
-
-                const precioCOP = plato.precioUSD * tasa;
-                const margen = costoPlato > 0 ? ((plato.precioUSD - costoPlato) / costoPlato * 100).toFixed(1) : '0';
-                const colorMargen = margen >= 50 ? 'text-success' : (margen >= 30 ? 'text-warning' : 'text-danger');
-
-                listaMenu.innerHTML += `
-                    <div class="col-6">
-                        <div class="card card-custom p-3 border-start border-4 border-warning h-100 plato-item" onclick="seleccionarPlato(${indice})">
-                            <h6 class="fw-bold mb-1">${plato.nombre}</h6>
-                            <div class="text-success fw-bold">${formatearMoneda(precioCOP)}</div>
-                            <small class="text-muted">Costo: $${costoPlato.toFixed(2)} USD</small><br>
-                            <small class="${colorMargen}">Margen: ${margen}%</small>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Renderizar historial de ventas
-            const historialVentas = document.getElementById('historialVentas');
-            historialVentas.innerHTML = '';
-            
-            const hoy = new Date().toLocaleDateString();
-            let ventasHoy = 0;
-            let gananciaHoy = 0;
-
-            data.movimientos.forEach(movimiento => {
-                const fechaMovimiento = new Date(movimiento.fecha).toLocaleDateString();
-                if(fechaMovimiento === hoy) {
-                    if(movimiento.tipo === 'venta') {
-                        ventasHoy += movimiento.monto;
-                        gananciaHoy += movimiento.ganancia;
-                    }
-                    if(movimiento.tipo === 'baja') {
-                        gananciaHoy -= movimiento.monto;
-                    }
-                }
-            });
-
-            const movimientosRecientes = data.movimientos.slice().reverse().slice(0, 10);
-            
-            movimientosRecientes.forEach(movimiento => {
-                let claseColor = '';
-                let icono = '';
-                
-                switch(movimiento.tipo) {
-                    case 'venta':
-                        claseColor = 'text-success';
-                        icono = '<i class="fas fa-cash-register me-2"></i>';
-                        break;
-                    case 'compra':
-                        claseColor = 'text-primary';
-                        icono = '<i class="fas fa-shopping-cart me-2"></i>';
-                        break;
-                    case 'baja':
-                        claseColor = 'text-danger';
-                        icono = '<i class="fas fa-trash me-2"></i>';
-                        break;
-                }
-
-                const fecha = new Date(movimiento.fecha).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                
-                historialVentas.innerHTML += `
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div class="d-flex align-items-center">
-                            ${icono}
-                            <div>
-                                <small class="d-block">${movimiento.detalle}</small>
-                                <small class="text-muted">${fecha}</small>
+                        <div class="currency-box">
+                            <div class="currency-label">TOTAL EN BOLÍVARES</div>
+                            <div class="currency-value">BS ${formatNumber(totalBS)}</div>
+                            <div style="font-size: 11px; color: #666; margin-top: 3px;">
+                                Tasa: ${formatNumber(dollarRate)} Bs/$
                             </div>
                         </div>
-                        <span class="${claseColor} fw-bold">$${movimiento.monto.toFixed(2)} USD</span>
                     </div>
                 `;
-            });
-
-            // Actualizar finanzas
-            document.getElementById('finGanancia').innerText = `$${gananciaHoy.toFixed(2)} USD`;
-            document.getElementById('finGananciaCop').innerText = formatearMoneda(gananciaHoy * tasa);
-            document.getElementById('finVentas').innerText = `$${ventasHoy.toFixed(2)} USD`;
-        }
-
-        function seleccionarPlato(indice) {
-            document.getElementById('selVenta').value = indice;
-            cambiarVista('ventas', document.querySelector('.nav-item-btn[onclick*="ventas"]'));
-            verificarStock();
-        }
-
-        // --- REPORTES PDF ---
-        async function generarReportePDF() {
-            const btnGenerar = document.getElementById('btnGenerarPDF');
-            const loading = document.getElementById('pdfLoading');
-            
-            btnGenerar.disabled = true;
-            loading.style.display = 'block';
-            
-            try {
-                const tasa = data.tasa;
-                const hoy = new Date();
-                
-                const movimientosHoy = data.movimientos.filter(m => 
-                    new Date(m.fecha).toDateString() === hoy.toDateString()
-                );
-
-                let totalVentas = 0;
-                let totalBajas = 0;
-                let totalCompras = 0;
-                let gananciaNeta = 0;
-
-                movimientosHoy.forEach(m => {
-                    if(m.tipo === 'venta') {
-                        totalVentas += m.monto;
-                        gananciaNeta += (m.ganancia || 0);
-                    } else if(m.tipo === 'baja') {
-                        totalBajas += m.monto;
-                        gananciaNeta -= m.monto;
-                    } else if(m.tipo === 'compra') {
-                        totalCompras += m.monto;
-                        gananciaNeta -= m.monto;
-                    }
-                });
-
-                // Crear documento PDF
-                const doc = new jsPDF();
-                
-                // Logo y título
-                doc.setFontSize(24);
-                doc.setTextColor(211, 84, 0); // Color naranja
-                doc.text('EFFATA', 105, 20, { align: 'center' });
-                doc.setFontSize(12);
-                doc.setTextColor(100, 100, 100);
-                doc.text('Antojos y Sabores', 105, 28, { align: 'center' });
-                
-                doc.setFontSize(14);
-                doc.setTextColor(0, 0, 0);
-                doc.text(`Cierre Diario - ${hoy.toLocaleDateString('es-ES')}`, 105, 40, { align: 'center' });
-                
-                // Tasa de cambio
-                doc.setFontSize(10);
-                doc.text(`Tasa de cambio: ${tasa.toFixed(2)} COP/USD`, 105, 48, { align: 'center' });
-                
-                let yPos = 60;
-                
-                // Resumen financiero
-                doc.setFontSize(12);
-                doc.setTextColor(44, 62, 80);
-                doc.text('RESUMEN FINANCIERO DEL DÍA', 14, yPos);
-                yPos += 10;
-                
-                doc.autoTable({
-                    startY: yPos,
-                    head: [['Concepto', 'USD', 'COP']],
-                    body: [
-                        ['Ventas Totales', `$${totalVentas.toFixed(2)}`, formatearMoneda(totalVentas * tasa)],
-                        ['Compras/Inversión', `$${totalCompras.toFixed(2)}`, formatearMoneda(totalCompras * tasa)],
-                        ['Bajas/Pérdidas', `$${totalBajas.toFixed(2)}`, formatearMoneda(totalBajas * tasa)],
-                        ['GANANCIA NETA', `$${gananciaNeta.toFixed(2)}`, formatearMoneda(gananciaNeta * tasa)]
-                    ],
-                    headStyles: { fillColor: [211, 84, 0], textColor: [255, 255, 255] },
-                    alternateRowStyles: { fillColor: [245, 245, 245] },
-                    margin: { left: 14, right: 14 }
-                });
-                
-                yPos = doc.lastAutoTable.finalY + 15;
-                
-                // Movimientos del día
-                if (movimientosHoy.length > 0) {
-                    doc.setFontSize(12);
-                    doc.text('MOVIMIENTOS DEL DÍA', 14, yPos);
-                    yPos += 10;
-                    
-                    const movimientosData = movimientosHoy.map(m => {
-                        const hora = new Date(m.fecha).toLocaleTimeString('es-ES', {hour: '2-digit', minute:'2-digit'});
-                        const tipo = m.tipo.toUpperCase();
-                        const montoUSD = `$${m.monto.toFixed(2)}`;
-                        const montoCOP = formatearMoneda(m.monto * tasa);
-                        return [hora, tipo, m.detalle, montoUSD, montoCOP];
-                    });
-                    
-                    doc.autoTable({
-                        startY: yPos,
-                        head: [['Hora', 'Tipo', 'Descripción', 'USD', 'COP']],
-                        body: movimientosData,
-                        headStyles: { fillColor: [44, 62, 80], textColor: [255, 255, 255] },
-                        alternateRowStyles: { fillColor: [245, 245, 245] },
-                        margin: { left: 14, right: 14 },
-                        columnStyles: {
-                            0: { cellWidth: 20 },
-                            1: { cellWidth: 20 },
-                            2: { cellWidth: 70 },
-                            3: { cellWidth: 25 },
-                            4: { cellWidth: 30 }
-                        }
-                    });
-                    
-                    yPos = doc.lastAutoTable.finalY + 15;
-                }
-                
-                // Inventario actual
-                if (data.inventario.length > 0) {
-                    doc.setFontSize(12);
-                    doc.text('INVENTARIO ACTUAL', 14, yPos);
-                    yPos += 10;
-                    
-                    const inventarioData = data.inventario.map(item => {
-                        const cantidadGramos = convertirUnidades(item.cantidad, item.unidad, 'g');
-                        const valorTotal = item.costoUnitarioUSD * item.cantidad;
-                        return [item.nombre, item.cantidad.toFixed(2), item.unidad, `${cantidadGramos.toFixed(0)}g`, `$${valorTotal.toFixed(2)}`];
-                    });
-                    
-                    const totalInventario = data.inventario.reduce((sum, item) => sum + (item.costoUnitarioUSD * item.cantidad), 0);
-                    inventarioData.push(['TOTAL', '', '', '', `$${totalInventario.toFixed(2)}`]);
-                    
-                    doc.autoTable({
-                        startY: yPos,
-                        head: [['Producto', 'Cantidad', 'Unidad', 'Gramos', 'Valor USD']],
-                        body: inventarioData,
-                        headStyles: { fillColor: [52, 152, 219], textColor: [255, 255, 255] },
-                        alternateRowStyles: { fillColor: [245, 245, 245] },
-                        margin: { left: 14, right: 14 }
-                    });
-                }
-                
-                // Pie de página
-                doc.setFontSize(10);
-                doc.setTextColor(100, 100, 100);
-                doc.text(`Generado el ${hoy.toLocaleString('es-ES')}`, 105, doc.internal.pageSize.height - 10, { align: 'center' });
-                doc.text('Sistema EFFATA v1.0', 105, doc.internal.pageSize.height - 5, { align: 'center' });
-                
-                // Guardar PDF
-                doc.save(`EFFATA_Cierre_${hoy.toISOString().split('T')[0]}.pdf`);
-                
-                Swal.fire({
-                    title: '¡PDF Generado!',
-                    text: 'El reporte se ha descargado correctamente',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-                
-            } catch (error) {
-                console.error('Error al generar PDF:', error);
-                Swal.fire({
-                    title: 'Error',
-                    text: 'No se pudo generar el PDF. Intente nuevamente.',
-                    icon: 'error'
-                });
-            } finally {
-                btnGenerar.disabled = false;
-                loading.style.display = 'none';
             }
         }
 
-        // --- BACKUP Y RESTAURACIÓN ---
-        function descargarBackup() {
-            const fecha = new Date().toISOString().split('T')[0];
-            const hora = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }).replace(/:/g, '-');
-            const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `effata_backup_${fecha}_${hora}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            
-            Swal.fire('Backup', 'Archivo de respaldo descargado', 'success');
-        }
+        // ==========================================
+        // FUNCIÓN PARA GENERAR PDF OPTIMIZADO
+        // ==========================================
 
-        function restaurarBackup(input) {
-            const file = input.files[0];
-            if(!file) return;
+        function generatePDF(documentType) {
+            if (products.length === 0) {
+                alert('No hay productos para generar el documento');
+                return;
+            }
+
+            const controlNumber = document.getElementById('controlNumberDisplay').textContent || 'Sin número';
+            const clientName = document.getElementById('clientName').value || 'Sin cliente';
+            const clientAddress = document.getElementById('clientAddress').value || '';
+            const clientRIF = document.getElementById('clientRIF').value || '';
+            const dollarRate = parseFloat(document.getElementById('dollarRate').value) || 1;
+            const ivaPercentage = parseFloat(document.getElementById('ivaPercentage').value) || 0;
             
-            Swal.fire({
-                title: '¿Restaurar backup?',
-                text: 'Esto sobrescribirá todos los datos actuales',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Sí, restaurar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const reader = new FileReader();
-                    reader.onload = function(e) {
-                        try {
-                            const datos = JSON.parse(e.target.result);
-                            if(datos.inventario && datos.menu && datos.movimientos) {
-                                data = datos;
-                                guardar();
-                                Swal.fire('¡Restaurado!', 'Datos recuperados correctamente', 'success');
-                            } else {
-                                Swal.fire('Error', 'El archivo no tiene el formato correcto', 'error');
-                            }
-                        } catch(err) {
-                            Swal.fire('Error', 'No se pudo leer el archivo', 'error');
-                        }
-                        input.value = '';
-                    };
-                    reader.readAsText(file);
+            // Determinar el tipo de documento
+            let documentTitle = '';
+            switch (documentType) {
+                case 'factura':
+                    documentTitle = 'FACTURA';
+                    break;
+                case 'nota':
+                    documentTitle = 'NOTA DE ENTREGA';
+                    break;
+                default:
+                    documentTitle = 'PRESUPUESTO';
+            }
+
+            // Crear PDF con jsPDF
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            // Configurar fuente
+            pdf.setFont('helvetica');
+
+            // ========== ENCABEZADO ==========
+            // Fondo azul
+            pdf.setFillColor(30, 75, 130);
+            pdf.rect(0, 0, pageWidth, 40, 'F');
+
+            // Logo
+            const logoImg = new Image();
+            logoImg.src = 'logomeygo.png';
+            
+            // Intentar cargar logo, si falla usar texto
+            try {
+                // Fondo blanco redondeado para el logo
+                pdf.setFillColor(255, 255, 255);
+                pdf.circle(27.5, 22.5, 13, 'F');
+                pdf.addImage(logoImg, 'PNG', 15, 10, 25, 25);
+            } catch (e) {
+                // Logo alternativo
+                pdf.setFillColor(255, 255, 255);
+                pdf.circle(27.5, 22.5, 13, 'F');
+                pdf.setTextColor(30, 75, 130);
+                pdf.setFontSize(10);
+                pdf.text('MEYGO', 27.5, 22, { align: 'center' });
+            }
+
+            // Información de la empresa
+            pdf.setTextColor(255, 255, 255);
+            pdf.setFontSize(16);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text("SUMINISTROS MEYGO, C.A.", pageWidth / 2, 18, { align: 'center' });
+
+            pdf.setFontSize(10);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text("RIF: J-410220430", pageWidth / 2, 24, { align: 'center' });
+            pdf.text("Urbanización Caña de Azúcar, sector 6 Bloque 5", pageWidth / 2, 30, { align: 'center' });
+            pdf.text("Maracay - Aragua. Venezuela | Tel: (414) 7327301", pageWidth / 2, 36, { align: 'center' });
+
+            // Título del documento
+            pdf.setFillColor(232, 241, 255);
+            pdf.rect(0, 40, pageWidth, 15, 'F');
+            pdf.setTextColor(30, 75, 130);
+            pdf.setFontSize(14);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text(documentTitle, pageWidth / 2, 50, { align: 'center' });
+
+            // ========== INFORMACIÓN DEL DOCUMENTO ==========
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+            
+            // Fecha de vencimiento (30 días)
+            const expiryDate = new Date(today);
+            expiryDate.setDate(expiryDate.getDate() + 30);
+            const formattedExpiryDate = expiryDate.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+            });
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont('helvetica', 'normal');
+            pdf.text(`Número: ${controlNumber}`, 20, 65);
+            pdf.text(`Fecha: ${formattedDate}`, 20, 71);
+            pdf.text(`Válido hasta: ${formattedExpiryDate}`, 20, 77);
+
+            // Información del cliente
+            pdf.text(`Cliente: ${clientName}`, 120, 65);
+            if (clientRIF) pdf.text(`RIF/Cédula: ${clientRIF}`, 120, 71);
+            if (clientAddress) {
+                const addressLines = pdf.splitTextToSize(`Dirección: ${clientAddress}`, 70);
+                pdf.text(addressLines[0], 120, 77);
+                if (addressLines[1]) pdf.text(addressLines[1], 120, 83);
+            }
+
+            // Línea separadora
+            pdf.setDrawColor(30, 75, 130);
+            pdf.line(14, 85, pageWidth - 14, 85);
+
+            // ========== TABLA DE PRODUCTOS ==========
+            // Preparar datos para la tabla según el método de pago
+            let tableColumn, tableData;
+
+            if (currentPaymentMethod === 'bolivares') {
+                tableColumn = ['Descripción', 'Cantidad', 'Unidad', 'Precio Unitario BS', 'Precio Total BS'];
+                tableData = products.map(product => [
+                    product.name,
+                    formatNumber(product.quantity, 0),
+                    product.unit,
+                    `BS ${formatNumber(product.priceBS)}`,
+                    `BS ${formatNumber(product.subtotalBS)}`
+                ]);
+            } else if (currentPaymentMethod === 'dolares') {
+                tableColumn = ['Descripción', 'Cantidad', 'Unidad', 'Precio Unitario $', 'Precio Total $'];
+                tableData = products.map(product => [
+                    product.name,
+                    formatNumber(product.quantity, 0),
+                    product.unit,
+                    `$${formatNumber(product.priceUSD)}`,
+                    `$${formatNumber(product.subtotalUSD)}`
+                ]);
+            } else {
+                // Pago mixto
+                tableColumn = ['Descripción', 'Cantidad', 'Unidad', 'Precio Unitario $', 'Precio Unitario BS', 'Precio Total $', 'Precio Total BS'];
+                tableData = products.map(product => {
+                    // Recalcular precio BS si es necesario
+                    let displayPriceBS = product.priceBS;
+                    let displaySubtotalBS = product.subtotalBS;
+                    
+                    if (!product.dollarRateAtAddition || product.paymentMethod !== 'mixto') {
+                        displayPriceBS = product.priceUSD * dollarRate;
+                        displaySubtotalBS = product.subtotalUSD * dollarRate;
+                    }
+                    
+                    return [
+                        product.name,
+                        formatNumber(product.quantity, 0),
+                        product.unit,
+                        `$${formatNumber(product.priceUSD)}`,
+                        `BS ${formatNumber(displayPriceBS)}`,
+                        `$${formatNumber(product.subtotalUSD)}`,
+                        `BS ${formatNumber(displaySubtotalBS)}`
+                    ];
+                });
+            }
+
+            // Agregar tabla optimizada
+            pdf.autoTable({
+                startY: 90,
+                head: [tableColumn],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [30, 75, 130],
+                    textColor: [255, 255, 255],
+                    fontStyle: 'bold',
+                    fontSize: 9,
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 8,
+                    font: 'helvetica',
+                    textColor: [0, 0, 0],
+                    lineWidth: 0.1
+                },
+                alternateRowStyles: {
+                    fillColor: [232, 241, 255]
+                },
+                margin: { left: 14, right: 14 },
+                tableWidth: 'auto',
+                styles: {
+                    overflow: 'linebreak',
+                    cellWidth: 'wrap'
+                },
+                columnStyles: {
+                    0: { cellWidth: 'auto' },
+                    1: { cellWidth: 20, halign: 'center' },
+                    2: { cellWidth: 25, halign: 'center' }
+                },
+                didDrawPage: function(data) {
+                    // Encabezado en cada página
+                    if (data.pageNumber > 1) {
+                        pdf.setFontSize(10);
+                        pdf.setFont('helvetica', 'bold');
+                        pdf.setTextColor(30, 75, 130);
+                        pdf.text(`${documentTitle} - ${controlNumber}`, pageWidth / 2, 20, { align: 'center' });
+                        pdf.text(`Cliente: ${clientName}`, pageWidth / 2, 26, { align: 'center' });
+                    }
                 }
             });
-        }
 
-        // --- UTILIDADES ---
-        function limpiar(ids) {
-            ids.forEach(id => {
-                const elemento = document.getElementById(id);
-                if(elemento) elemento.value = '';
+            // ========== TOTALES ==========
+            const finalY = pdf.lastAutoTable.finalY + 10;
+
+            pdf.setFontSize(10);
+            pdf.setTextColor(0, 0, 0);
+
+            if (currentPaymentMethod === 'bolivares') {
+                pdf.text(`Subtotal: BS ${formatNumber(subtotalBS)}`, pageWidth - 20, finalY, { align: 'right' });
+                pdf.text(`IVA (${ivaPercentage}%): BS ${formatNumber(ivaAmount)}`, pageWidth - 20, finalY + 6, { align: 'right' });
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 75, 130);
+                pdf.text(`TOTAL GENERAL: BS ${formatNumber(totalBS)}`, pageWidth - 20, finalY + 16, { align: 'right' });
+            } else if (currentPaymentMethod === 'dolares') {
+                pdf.text(`Subtotal: $${formatNumber(subtotalUSD)}`, pageWidth - 20, finalY, { align: 'right' });
+                pdf.text(`IVA (${ivaPercentage}%): $${formatNumber(ivaAmount)}`, pageWidth - 20, finalY + 6, { align: 'right' });
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 75, 130);
+                pdf.text(`TOTAL GENERAL: $${formatNumber(totalUSD)}`, pageWidth - 20, finalY + 16, { align: 'right' });
+            } else {
+                // Calcular iva en BS para mostrar en PDF
+                const ivaAmountBS = products.reduce((total, product) => {
+                    if (product.dollarRateAtAddition && product.paymentMethod === 'mixto') {
+                        return total + (product.hasIVA ? product.ivaBS : 0);
+                    } else {
+                        return total + (product.hasIVA ? product.ivaUSD * dollarRate : 0);
+                    }
+                }, 0);
+                
+                pdf.text(`Subtotal: $${formatNumber(subtotalUSD)} | BS ${formatNumber(subtotalBS)}`, pageWidth - 20, finalY, { align: 'right' });
+                pdf.text(`IVA (${ivaPercentage}%): $${formatNumber(ivaAmount)} | BS ${formatNumber(ivaAmountBS)}`, pageWidth - 20, finalY + 6, { align: 'right' });
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(30, 75, 130);
+                pdf.text(`TOTAL GENERAL: $${formatNumber(totalUSD)} | BS ${formatNumber(totalBS)}`, pageWidth - 20, finalY + 16, { align: 'right' });
+            }
+
+            // ========== INFORMACIÓN DE PAGO ==========
+            const paymentStartY = finalY + 25;
+            const paymentHeight = 20 + (persistentData.paymentInfo.length * 6);
+            
+            pdf.setFillColor(232, 245, 233);
+            pdf.roundedRect(14, paymentStartY, pageWidth - 28, paymentHeight, 2, 2, 'F');
+            pdf.setDrawColor(76, 175, 80);
+            pdf.setLineWidth(0.5);
+            pdf.roundedRect(14, paymentStartY, pageWidth - 28, paymentHeight, 2, 2, 'S');
+
+            pdf.setFontSize(9);
+            pdf.setTextColor(0, 0, 0);
+            pdf.setFont('helvetica', 'bold');
+            pdf.text("INFORMACIÓN DE PAGO:", 20, paymentStartY + 10);
+            pdf.setFont('helvetica', 'normal');
+
+            let payY = paymentStartY + 16;
+            persistentData.paymentInfo.forEach(line => {
+                pdf.text(line, 20, payY);
+                payY += 6;
             });
+
+            if (currentPaymentMethod === 'mixto') {
+                pdf.text(`TASA BCV: ${formatNumber(dollarRate)} Bs/$`, 20, payY);
+            }
+
+            // ========== FIRMA ==========
+            const signY = paymentStartY + paymentHeight + 20;
+            pdf.setFont('helvetica', 'bold');
+            pdf.text("Beatriz Veiga", pageWidth / 2, signY, { align: 'center' });
+            pdf.text("Presidente", pageWidth / 2, signY + 6, { align: 'center' });
+            pdf.setFont('helvetica', 'normal');
+            pdf.text("Tel: (58) 414-7327301", pageWidth / 2, signY + 12, { align: 'center' });
+
+            // ========== FOOTER ==========
+            pdf.setFontSize(8);
+            pdf.setTextColor(100, 100, 100);
+            const footerY = pageHeight - 10;
+            pdf.text("Suministros Meygo, C.A. - Especialistas en suministros industriales y de oficina", pageWidth / 2, footerY - 10, { align: 'center' });
+            pdf.text("Email: suministrosmeygo.ca@gmail.com", pageWidth / 2, footerY - 5, { align: 'center' });
+
+            // ========== GUARDAR PDF ==========
+            const fileName = `${documentTitle.toLowerCase()}_${controlNumber.replace('/', '_')}_${clientName.replace(/\s+/g, '_')}.pdf`;
+            pdf.save(fileName);
+
+            // Guardar en Historial
+            saveToHistory({
+                date: formattedDate,
+                type: documentType,
+                number: controlNumber,
+                client: clientName,
+                total: currentPaymentMethod === 'bolivares' ? `BS ${formatNumber(totalBS)}` : 
+                       currentPaymentMethod === 'dolares' ? `$${formatNumber(totalUSD)}` :
+                       `$${formatNumber(totalUSD)} | BS ${formatNumber(totalBS)}`,
+                productsCount: products.length,
+                paymentMethod: currentPaymentMethod
+            });
+
+            // Incrementar contador después de generar PDF
+            controlNumbers[currentDocType] = parseInt(controlNumbers[currentDocType]) + 1;
+            saveToLocalStorage();
+            updateControlNumberDisplay();
+            
+            showStatus('PDF generado y descargado correctamente');
         }
 
-        function formatearMoneda(valor) {
-            return new Intl.NumberFormat('es-CO', {
-                style: 'currency',
-                currency: 'COP',
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(valor);
+        // ==========================================
+        // FUNCIONES DE HISTORIAL
+        // ==========================================
+
+        function saveToHistory(docData) {
+            if (!persistentData.documents) persistentData.documents = [];
+            persistentData.documents.unshift({
+                ...docData,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Mantener solo los últimos 100 documentos
+            if (persistentData.documents.length > 100) {
+                persistentData.documents = persistentData.documents.slice(0, 100);
+            }
+            
+            saveToLocalStorage();
+            renderHistory();
         }
 
-        function borrarTodo() {
-            Swal.fire({
-                title: '¿Resetear todo?',
-                text: 'Esta acción eliminará TODOS los datos y no se puede deshacer',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Sí, borrar todo',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    localStorage.removeItem('effata_system_db');
-                    location.reload();
+        function renderHistory() {
+            const list = document.getElementById('historyList');
+            if (!list) return;
+
+            if (!persistentData.documents || persistentData.documents.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No hay documentos recientes</div>';
+                return;
+            }
+
+            list.innerHTML = '';
+            persistentData.documents.slice(0, 10).forEach((doc, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+                item.style.padding = '10px';
+                item.style.borderBottom = '1px solid #eee';
+                item.style.display = 'flex';
+                item.style.justifyContent = 'space-between';
+                item.style.alignItems = 'center';
+                item.style.cursor = 'pointer';
+                item.style.backgroundColor = index % 2 === 0 ? '#fff' : '#f9f9f9';
+                item.style.transition = 'background-color 0.3s';
+
+                item.onmouseenter = () => item.style.backgroundColor = 'var(--color-secondary)';
+                item.onmouseleave = () => item.style.backgroundColor = index % 2 === 0 ? '#fff' : '#f9f9f9';
+
+                let iconClass = 'fa-file';
+                if (doc.type === 'factura') iconClass = 'fa-receipt';
+                else if (doc.type === 'presupuesto') iconClass = 'fa-file-invoice-dollar';
+                else if (doc.type === 'nota') iconClass = 'fa-truck';
+
+                // Icono de método de pago
+                let paymentIcon = 'fa-dollar-sign';
+                if (doc.paymentMethod === 'bolivares') paymentIcon = 'fa-bolt';
+                else if (doc.paymentMethod === 'mixto') paymentIcon = 'fa-exchange-alt';
+
+                // Formatear fecha
+                const dateObj = new Date(doc.timestamp || doc.date);
+                const formattedDate = dateObj.toLocaleDateString('es-ES', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                });
+
+                item.innerHTML = `
+                    <div style="flex: 1;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas ${iconClass}" style="color: var(--color-primary);"></i>
+                            <strong style="color: var(--color-primary); font-size: 13px;">${doc.number}</strong>
+                            <i class="fas ${paymentIcon}" style="color: #666; font-size: 11px;"></i>
+                        </div>
+                        <div style="font-size: 12px; color: #666; margin-top: 4px;">
+                            <div>${doc.client}</div>
+                            <div style="font-size: 11px;">${formattedDate} • ${doc.productsCount || 0} productos</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; font-size: 12px; color: var(--color-primary);">${doc.total}</div>
+                        <button onclick="event.stopPropagation(); loadHistoryItem(${index})" 
+                                style="margin-top: 5px; padding: 4px 8px; font-size: 11px; background: var(--color-info); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                            <i class="fas fa-redo"></i> Cargar
+                        </button>
+                    </div>
+                `;
+
+                // Al hacer clic en el item, mostrar detalles
+                item.onclick = () => showHistoryDetails(index);
+                
+                list.appendChild(item);
+            });
+
+            // Mostrar contador total
+            if (persistentData.documents.length > 10) {
+                const moreItem = document.createElement('div');
+                moreItem.style.textAlign = 'center';
+                moreItem.style.padding = '10px';
+                moreItem.style.color = 'var(--color-primary)';
+                moreItem.style.fontSize = '12px';
+                moreItem.textContent = `+${persistentData.documents.length - 10} documentos más...`;
+                list.appendChild(moreItem);
+            }
+        }
+
+        // Función para mostrar detalles del historial (global para acceso desde HTML)
+        window.showHistoryDetails = function(index) {
+            if (index >= 0 && index < persistentData.documents.length) {
+                const doc = persistentData.documents[index];
+                alert(`Detalles del documento:\n\n` +
+                      `Tipo: ${doc.type.toUpperCase()}\n` +
+                      `Número: ${doc.number}\n` +
+                      `Cliente: ${doc.client}\n` +
+                      `Fecha: ${doc.date}\n` +
+                      `Método de Pago: ${doc.paymentMethod ? doc.paymentMethod.toUpperCase() : 'No especificado'}\n` +
+                      `Total: ${doc.total}\n` +
+                      `Productos: ${doc.productsCount || 'No disponible'}`);
+            }
+        };
+
+        // Función para cargar documento del historial
+        window.loadHistoryItem = function(index) {
+            if (confirm('¿Desea cargar este documento? Se reemplazarán los datos actuales.')) {
+                // Aquí puedes implementar la lógica para cargar datos específicos
+                // Por ahora, solo cargamos información básica
+                const doc = persistentData.documents[index];
+                document.getElementById('clientName').value = doc.client || '';
+                showStatus('Datos del cliente cargados desde historial');
+            }
+        };
+
+        // Función para limpiar todo el documento actual
+        function clearAll() {
+            if (confirm('¿Está seguro de que desea limpiar todo el documento actual?')) {
+                products = [];
+                document.getElementById('productsList').innerHTML = '';
+                document.getElementById('productName').value = '';
+                document.getElementById('productQuantity').value = '1';
+                document.getElementById('productUnit').value = '';
+                document.getElementById('productPrice').value = '';
+                document.getElementById('productIVA').checked = false;
+
+                // Incrementar el número de control al limpiar/finalizar
+                controlNumbers[currentDocType] = parseInt(controlNumbers[currentDocType]) + 1;
+                updateControlNumberDisplay();
+                saveToLocalStorage();
+                updateTotals();
+                updateTableStructure();
+                
+                showStatus('Documento limpiado, número de control actualizado');
+            }
+        }
+
+        // ==========================================
+        // INICIALIZACIÓN DE LA APLICACIÓN
+        // ==========================================
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicializar elementos
+            const addProductBtn = document.getElementById('addProduct');
+            const generatePDFBtn = document.getElementById('generatePDF');
+            const clearAllBtn = document.getElementById('clearAll');
+            const dollarRateInput = document.getElementById('dollarRate');
+            const ivaPercentageInput = document.getElementById('ivaPercentage');
+            const docTypeButtons = document.querySelectorAll('.doc-type-btn');
+            const paymentMethods = document.querySelectorAll('.payment-method');
+            const editControlBtn = document.getElementById('editControlBtn');
+            const controlNumberModal = document.getElementById('controlNumberModal');
+            const closeModal = document.getElementById('closeModal');
+            const saveControlNumber = document.getElementById('saveControlNumber');
+            const cancelControlNumber = document.getElementById('cancelControlNumber');
+            const controlNumberInputModal = document.getElementById('controlNumberInput');
+            const clientSelect = document.getElementById('clientSelect');
+            const clearClientBtn = document.getElementById('clearClientBtn');
+            const saveClientBtn = document.getElementById('saveClientBtn');
+            const editPaymentInfoBtn = document.getElementById('editPaymentInfoBtn');
+            const paymentInfoModal = document.getElementById('paymentInfoModal');
+            const closePaymentModal = document.getElementById('closePaymentModal');
+            const savePaymentInfoModal = document.getElementById('savePaymentInfoModal');
+            const addPaymentLineBtn = document.getElementById('addPaymentLineBtn');
+            const addSupplierProductBtn = document.getElementById('addSupplierProduct');
+            const catalogSelect = document.getElementById('catalogSelect');
+            const backupDataBtn = document.getElementById('backupData');
+            const restoreDataBtn = document.getElementById('restoreData');
+            const clearAllDataBtn = document.getElementById('clearAllData');
+
+            // Cargar datos desde localStorage al iniciar
+            loadFromLocalStorage();
+
+            // Event Listeners
+            addProductBtn.addEventListener('click', addProduct);
+            generatePDFBtn.addEventListener('click', function () {
+                const docTypeText = document.querySelector('.doc-type-btn.active').textContent;
+                if (confirm(`¿Está seguro que desea generar el ${docTypeText}?`)) {
+                    generatePDF(currentDocType);
                 }
             });
-        }
+            clearAllBtn.addEventListener('click', clearAll);
+            
+            // Actualizar tasas y recalcular
+            dollarRateInput.addEventListener('input', function() {
+                if (currentPaymentMethod === 'mixto') {
+                    // Solo recalcular si es pago mixto
+                    updateTotals();
+                    updateProductsTable();
+                    updateDisplay();
+                }
+                saveToLocalStorage();
+            });
+            
+            ivaPercentageInput.addEventListener('input', function() {
+                updateTotals();
+                saveToLocalStorage();
+            });
 
-        // --- EVENT LISTENERS ---
-        document.getElementById('tasaCambio').addEventListener('change', guardar);
-        document.getElementById('tasaCambio').addEventListener('input', function() {
-            if(this.value < 1) this.value = 1;
-        });
+            // Cambiar tipo de documento
+            docTypeButtons.forEach(button => {
+                button.addEventListener('click', function () {
+                    docTypeButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    changeDocumentType(this.getAttribute('data-doctype'));
+                });
+            });
 
-        document.addEventListener('DOMContentLoaded', function() {
+            // Cambiar método de pago
+            paymentMethods.forEach(method => {
+                method.addEventListener('click', function () {
+                    const newPaymentMethod = this.getAttribute('data-payment');
+                    
+                    if (changePaymentMethod(newPaymentMethod)) {
+                        paymentMethods.forEach(m => m.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // Modal para editar número de control
+            editControlBtn.addEventListener('click', function () {
+                controlNumberInputModal.value = document.getElementById('controlNumberDisplay').textContent;
+                controlNumberModal.style.display = 'flex';
+            });
+
+            closeModal.addEventListener('click', function () {
+                controlNumberModal.style.display = 'none';
+            });
+
+            cancelControlNumber.addEventListener('click', function () {
+                controlNumberModal.style.display = 'none';
+            });
+
+            saveControlNumber.addEventListener('click', function () {
+                if (controlNumberInputModal.value.trim()) {
+                    // Actualizar número de control manualmente
+                    const newNumber = controlNumberInputModal.value.trim();
+                    document.getElementById('controlNumberDisplay').textContent = newNumber;
+                    controlNumberModal.style.display = 'none';
+                    showStatus('Número de control actualizado manualmente');
+                } else {
+                    alert('Por favor ingrese un número de control válido');
+                }
+            });
+
+            // Gestión de clientes
+            clientSelect.addEventListener('change', function () {
+                const selectedIndex = parseInt(this.value);
+                if (!isNaN(selectedIndex) && selectedIndex >= 0) {
+                    loadClientData(selectedIndex);
+                }
+            });
+
+            clearClientBtn.addEventListener('click', function () {
+                clientSelect.value = '';
+                document.getElementById('clientName').value = '';
+                document.getElementById('clientAddress').value = '';
+                document.getElementById('clientRIF').value = '';
+            });
+
+            saveClientBtn.addEventListener('click', saveCurrentClient);
+
+            // Guardar Tasa Dólar al cambiar
+            dollarRateInput.addEventListener('change', function () {
+                persistentData.dollarRate = parseFloat(this.value) || 0;
+                saveToLocalStorage();
+            });
+
+            // Lógica Modal Payment Info
+            editPaymentInfoBtn.addEventListener('click', function () {
+                const list = document.getElementById('paymentLinesList');
+                list.innerHTML = '';
+                persistentData.paymentInfo.forEach(text => {
+                    addPaymentLineInput(text);
+                });
+                paymentInfoModal.style.display = 'flex';
+            });
+
+            closePaymentModal.addEventListener('click', () => paymentInfoModal.style.display = 'none');
+
+            addPaymentLineBtn.addEventListener('click', () => addPaymentLineInput(''));
+
+            savePaymentInfoModal.addEventListener('click', function () {
+                const inputs = document.querySelectorAll('#paymentLinesList input');
+                const newLines = [];
+                inputs.forEach(input => {
+                    if (input.value.trim()) newLines.push(input.value.trim());
+                });
+                persistentData.paymentInfo = newLines;
+                saveToLocalStorage();
+                renderPaymentInfo();
+                paymentInfoModal.style.display = 'none';
+                showStatus('Información de pago actualizada');
+            });
+
+            function addPaymentLineInput(value) {
+                const div = document.createElement('div');
+                div.className = 'form-group checkbox-group';
+                div.style.marginBottom = '10px';
+
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = value;
+                input.placeholder = 'Información de pago...';
+                input.style.flex = '1';
+
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-danger';
+                btn.innerHTML = '<i class="fas fa-trash"></i>';
+                btn.style.padding = '5px 10px';
+                btn.onclick = () => div.remove();
+
+                div.appendChild(input);
+                div.appendChild(btn);
+
+                document.getElementById('paymentLinesList').appendChild(div);
+            }
+
+            // Gestión de catálogo
+            addSupplierProductBtn.addEventListener('click', addToCatalog);
+            
+            catalogSelect.addEventListener('change', function() {
+                const selectedIndex = parseInt(this.value);
+                if (!isNaN(selectedIndex) && selectedIndex >= 0) {
+                    loadProductFromCatalog(selectedIndex);
+                }
+            });
+
+            // Gestión de datos
+            backupDataBtn.addEventListener('click', backupData);
+            restoreDataBtn.addEventListener('click', restoreData);
+            clearAllDataBtn.addEventListener('click', clearAllData);
+
+            // Auto-guardar cada 30 segundos
+            setInterval(() => {
+                saveToLocalStorage();
+            }, 30000);
+
+            // Auto-guardar al salir de la página
+            window.addEventListener('beforeunload', function() {
+                saveToLocalStorage();
+            });
+
+            // Actualizar visualización inicial
+            updateDisplay();
+            updateTableStructure();
+            
+            // Mostrar mensaje de bienvenida
             setTimeout(() => {
-                document.querySelector('.app-header').classList.add('animate__animated', 'animate__fadeInDown');
-            }, 100);
+                showStatus('Sistema listo. Los datos se guardan automáticamente en su navegador.');
+            }, 1000);
         });
     </script>
 </body>
